@@ -1,0 +1,9 @@
+{
+  "trigger_type": "recording_ready",
+  "trigger_entity_id": "sensor.front_recording",
+  "camera_entity_id": "camera.front",
+  "occurred_at": "2026-10-14T12:00:00+00:00",
+  "event_id": "synthetic-context",
+  "context_id": "synthetic-context",
+  "media_identifier": "synthetic-media"
+}

@@ -1,0 +1,50 @@
+name: Home Assistant tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, 'codex/ha-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: '3.13'
+            requirements: requirements-test-min.txt
+            ha: '2025.2.0'
+          - python: '3.14'
+            requirements: requirements-test.txt
+            ha: '2026.10.1'
+    name: HA ${{ matrix.ha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install test dependencies
+        working-directory: .
+        run: python -m pip install -r ${{ matrix.requirements }}
+      - name: Check dependencies
+        run: python -m pip check
+      - name: Validate JSON and Python
+        working-directory: .
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for path in [Path('hacs.json'), *Path('custom_components').rglob('*.json')]:
+              json.loads(path.read_text(encoding='utf-8'))
+          for path in [*Path('custom_components').rglob('*.py'), *Path('tests').rglob('*.py')]:
+              compile(path.read_text(encoding='utf-8'), str(path), 'exec')
+          PY
+          python -m ruff check custom_components tests
+      - name: Run mandatory standalone tests
+        working-directory: .
+        run: python -m pytest -c pytest.ini --confcutdir=. tests

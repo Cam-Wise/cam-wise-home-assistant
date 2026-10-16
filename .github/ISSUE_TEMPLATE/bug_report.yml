@@ -1,0 +1,22 @@
+name: Bug report
+description: Report a reproducible integration problem without private data
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include tokens, camera footage, media URLs or unreviewed diagnostics. Security reports need the confidential route in SECURITY.md."
+  - type: input
+    id: versions
+    attributes:
+      label: HA, integration and desktop versions
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected result and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reviewed and redacted evidence

@@ -1,0 +1,98 @@
+{
+  "title": "Cam-Wise",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met Cam-Wise",
+        "description": "Voer het LAN-adres van Cam-Wise in.",
+        "data": {
+          "host": "Host- of IP-adres",
+          "port": "API-poort"
+        },
+        "data_description": {
+          "host": "De lokale hostnaam of het IP-adres van de Cam-Wise-app, zonder http:// of pad.",
+          "port": "De lokale API-poort van Cam-Wise."
+        }
+      },
+      "confirm": {
+        "title": "Cam-Wise gevonden",
+        "description": "Cam-Wise is gevonden op {host}:{port}. Versie: {version}. Omgeving: {environment}."
+      },
+      "reconfigure": {
+        "title": "Cam-Wise opnieuw configureren",
+        "description": "Werk het LAN-adres van deze Cam-Wise-installatie bij.",
+        "data": {
+          "host": "Host- of IP-adres",
+          "port": "API-poort"
+        },
+        "data_description": {
+          "host": "De nieuwe lokale hostnaam of het nieuwe IP-adres van dezelfde Cam-Wise-installatie.",
+          "port": "De lokale API-poort van Cam-Wise."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan geen verbinding maken met Cam-Wise.",
+      "invalid_host": "Voer een hostnaam of IP-adres in zonder pad of querystring.",
+      "unsupported_api_version": "Deze Cam-Wise API-versie wordt niet ondersteund.",
+      "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie."
+    },
+    "abort": {
+      "already_configured": "Deze Cam-Wise-installatie is al geconfigureerd.",
+      "cannot_connect": "De gevonden Cam-Wise-installatie kon niet worden bereikt.",
+      "discovery_expired": "De gevonden Cam-Wise-installatie is niet meer beschikbaar. Voeg deze handmatig toe of wacht tot discovery opnieuw draait.",
+      "reconfigure_successful": "De verbindingsgegevens van Cam-Wise zijn bijgewerkt.",
+      "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aanbevolen koppeling",
+        "description": "Cam-Wise heeft een camerakoppeling gevonden.\n\n{device}\n\nGevonden: {found}.",
+        "data": {
+          "use_recommended": "Deze koppeling gebruiken",
+          "choose_entities": "Andere entiteiten kiezen"
+        },
+        "data_description": {
+          "use_recommended": "Gebruik de door Cam-Wise aanbevolen Home Assistant-camera en event-entiteiten.",
+          "choose_entities": "Open het formulier voor handmatige entiteitskeuze in plaats van de aanbeveling te gebruiken."
+        }
+      },
+      "advanced": {
+        "title": "Andere entiteiten kiezen",
+        "description": "Geavanceerde fallback. Kies welke Home Assistant-entiteiten reviewitems in Cam-Wise mogen maken.",
+        "data": {
+          "camera_entity_id": "Camera-entiteit",
+          "recording_entity_id": "Opname-klaar-entiteit",
+          "motion_entity_id": "Bewegingsentiteit",
+          "ding_entity_id": "Deurbelentiteit"
+        },
+        "data_description": {
+          "camera_entity_id": "Camera-entiteit die als broncamera in Cam-Wise reviewitems wordt gebruikt.",
+          "recording_entity_id": "Entiteit die de nieuwste media-identificatie geeft zodra een opname klaarstaat.",
+          "motion_entity_id": "Entiteit waarvan statuswijzigingen bewegingsgebeurtenissen aangeven.",
+          "ding_entity_id": "Entiteit waarvan statuswijzigingen deurbelgebeurtenissen aangeven."
+        }
+      }
+    },
+    "error": {
+      "invalid_mapping": "Kies bestaande entiteiten met het juiste domein en verschillende eventrollen."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status"
+      },
+      "review_queue": {
+        "name": "Reviewwachtrij"
+      }
+    },
+    "binary_sensor": {
+      "attention_required": {
+        "name": "Aandacht vereist"
+      }
+    }
+  }
+}

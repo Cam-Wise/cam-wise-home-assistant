@@ -1,0 +1,98 @@
+{
+  "title": "Cam-Wise",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Cam-Wise",
+        "description": "Enter the LAN address of Cam-Wise.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "API port"
+        },
+        "data_description": {
+          "host": "The local hostname or IP address of the Cam-Wise app, without http:// or a path.",
+          "port": "The local API port exposed by Cam-Wise."
+        }
+      },
+      "confirm": {
+        "title": "Cam-Wise found",
+        "description": "Cam-Wise was found at {host}:{port}. Version: {version}. Environment: {environment}."
+      },
+      "reconfigure": {
+        "title": "Reconfigure Cam-Wise",
+        "description": "Update the LAN address for this Cam-Wise installation.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "API port"
+        },
+        "data_description": {
+          "host": "The new local hostname or IP address for the same Cam-Wise installation.",
+          "port": "The local API port exposed by Cam-Wise."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to Cam-Wise.",
+      "invalid_host": "Enter a hostname or IP address without a path or query string.",
+      "unsupported_api_version": "This Cam-Wise API version is not supported.",
+      "different_device": "This address belongs to a different Cam-Wise installation."
+    },
+    "abort": {
+      "already_configured": "This Cam-Wise installation is already configured.",
+      "cannot_connect": "The discovered Cam-Wise installation could not be reached.",
+      "discovery_expired": "The discovered Cam-Wise installation is no longer available. Add it manually or wait for discovery to run again.",
+      "reconfigure_successful": "Cam-Wise connection details were updated.",
+      "unsupported_api_version": "The discovered Cam-Wise API version is not supported."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Recommended link",
+        "description": "Cam-Wise found a camera link.\n\n{device}\n\nFound: {found}.",
+        "data": {
+          "use_recommended": "Use this link",
+          "choose_entities": "Choose other entities"
+        },
+        "data_description": {
+          "use_recommended": "Use Cam-Wise's recommended Home Assistant camera and event entities.",
+          "choose_entities": "Open the manual entity selection form instead of using the recommendation."
+        }
+      },
+      "advanced": {
+        "title": "Choose other entities",
+        "description": "Advanced fallback. Choose which Home Assistant entities may create Cam-Wise review items.",
+        "data": {
+          "camera_entity_id": "Camera entity",
+          "recording_entity_id": "Recording-ready entity",
+          "motion_entity_id": "Motion entity",
+          "ding_entity_id": "Doorbell entity"
+        },
+        "data_description": {
+          "camera_entity_id": "Camera entity used as the source camera in Cam-Wise review items.",
+          "recording_entity_id": "Entity that exposes the latest media identifier when a recording is ready.",
+          "motion_entity_id": "Entity whose state changes indicate motion events.",
+          "ding_entity_id": "Entity whose state changes indicate doorbell events."
+        }
+      }
+    },
+    "error": {
+      "invalid_mapping": "Choose existing entities with the correct domain and distinct event roles."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status"
+      },
+      "review_queue": {
+        "name": "Review queue"
+      }
+    },
+    "binary_sensor": {
+      "attention_required": {
+        "name": "Attention required"
+      }
+    }
+  }
+}
