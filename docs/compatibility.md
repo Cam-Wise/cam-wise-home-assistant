@@ -8,7 +8,7 @@ Measured on 2026-10-16. These observations cover different scopes.
 | HA 2026.10.1 / Python 3.14 | PASS: same 89 tests and isolated real-process lifecycle checks |
 | HA 2025.1 or older | Unsupported: required Zeroconf helper import unavailable |
 | API 1 | Only supported protocol; schema/client tests and source-runtime E2E |
-| HACS 2.0.5 on HA 2026.10.1 | PASS: custom repository recognized, actual download, restart/configuration/three entities/reload/removal |
+| HACS 2.0.5 on HA 2026.10.1 | PASS: custom repository recognized; exact v0.1.0-beta.1 prerelease installed with beta visibility enabled; restart/configuration/three entities/reload/removal |
 | Linux Desktop 0.1.23 source with HA 2026.10.1 | PASS: real event, HTTP video/hash, existing ONNX worker, saved detection and Review API/JPEG |
 | Windows packaged Desktop E2E | NOT PROVEN: no certified packaged version range |
 | Upgrade between released integration versions | NOT TESTED: only branch refresh/same-ref redownload tested |
@@ -17,7 +17,10 @@ Hosted [HA tests](https://github.com/Cam-Wise/cam-wise-home-assistant/actions/ru
 [HACS](https://github.com/Cam-Wise/cam-wise-home-assistant/actions/runs/38944249286)
 and [Hassfest](https://github.com/Cam-Wise/cam-wise-home-assistant/actions/runs/38944249273)
 passed on initial source `604e4d7a0d5c281461730f50d8fe2aef4ed8be54`.
-Later documentation changes do not expand runtime compatibility claims.
+A fresh tagged-version test also passed for prerelease `v0.1.0-beta.1` at commit
+`21516f8bff9fc8742bc215a602971a2b674f724d`, with the normal HACS install path
+`<HA config>/custom_components/cam_wise`. This does not expand Desktop compatibility
+claims. Only one release exists; update/rollback between versions remains untested.
 
 The HACS lifecycle test used real HA/HACS handlers programmatically with a
 synthetic Desktop HTTP API. Restart means a new HA process with saved settings.

@@ -1,19 +1,19 @@
 # Beta release, update test and HACS inclusion plan
 
-The repository is public and HACS custom installation is validated. No tagged
-release, announcement or official HACS submission has been made. Each requires
-its own approval. See the [release checklist](../PUBLICATION_CHECKLIST.md) and
+The repository is public and `v0.1.0-beta.1` is published as a limited developer
+prerelease at `21516f8bff9fc8742bc215a602971a2b674f724d`. No announcement or official
+HACS submission has been made; further releases and external publicity need their
+own approval. See the [release checklist](../PUBLICATION_CHECKLIST.md) and
 [draft notes](release-notes-v0.1.0-beta.1.md).
 
 ## First beta
 
-Merge the documentation PR through protected main, require all four checks on the
-exact candidate, and record commit/manifest/runtime identity. Obtain owner approval
-for `v0.1.0-beta.1`, the release notes and the unproven Windows scope before creating
-an immutable tag and prerelease. No new Desktop release is required.
-After approval, verify a fresh HACS installation selects the exact released commit
-and version; record HACS's prerelease selection behavior. Do not call a main-branch
-download a successful tagged-release install. Do not change a published tag.
+PR #1 was merged through protected main with four green checks; the owner approved
+the exact source, notes and limited scope with Windows packaged E2E NOT PROVEN.
+The immutable tag/release was created without a Desktop build or binary assets.
+Fresh HACS 2.0.5 on HA 2026.10.1 found and installed the exact tag with beta visibility
+enabled; configuration/entities/restart/reload/removal passed. This was a real
+programmatic websocket test, not visual UI testing. Do not change the published tag.
 
 ## HACS update test after the first release
 

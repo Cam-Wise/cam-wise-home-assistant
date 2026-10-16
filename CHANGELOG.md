@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0-beta.1 — prepared, not released
+## 0.1.0-beta.1 — 2026-10-16 (developer-preview prerelease)
 
 - Prepare the first independent public integration beta for
   `cam-wise/cam-wise-home-assistant`, maintained by `@Bob-Cam-Wise`.
@@ -25,6 +25,8 @@
   reporting, manual Windows checks and post-release update validation.
 - Keep manifest, runtime diagnostics and protocol fixture versions consistent.
 
-Public source and HACS custom installation are available; no tag or GitHub release
-has been published. Version-to-version HACS upgrade is not yet tested.
+Published as a prerelease at commit `21516f8bff9fc8742bc215a602971a2b674f724d`,
+without binary assets. Exact tagged-version HACS 2.0.5 installation/lifecycle passed
+in fresh HA 2026.10.1. Windows packaged E2E is NOT PROVEN; version-to-version
+HACS update/rollback is NOT TESTED.
 Desktop and integration updates have independent release processes.
