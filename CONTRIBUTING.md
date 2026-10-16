@@ -49,12 +49,14 @@ a separate approved design task; stronger receipts/authentication are not introd
 here. Do not couple integration releases to a desktop release branch or merge
 unreviewed product changes. Keep development data isolated from active installations.
 
-Require HA 2025.2.0, HA 2026.10.1, HACS and Hassfest status checks in GitHub branch
-protection. HACS/hassfest jobs run official actions with no ignored checks. Local
+Main requires PRs and green HA 2025.2.0, HA 2026.10.1, HACS and Hassfest checks.
+Force pushes/deletion are blocked; no second reviewer is required while there is
+one maintainer. HACS/hassfest jobs run official actions with no ignored checks. Local
 commands and successful workflow syntax checks do not prove hosted Actions passed.
-All metadata, security contact, license/brand and practice-evidence gates in
-PUBLICATION_CHECKLIST.md must be resolved before separately approved publication.
-Codeowner: `@Bob-Cam-Wise`; intended repository: `cam-wise/cam-wise-home-assistant`.
+Public HACS installation and hosted validation have passed. Follow
+PUBLICATION_CHECKLIST.md before the separately approved first tagged beta;
+Windows packaged E2E remains NOT PROVEN.
+Codeowner: `@Bob-Cam-Wise`; repository: `cam-wise/cam-wise-home-assistant`.
 Report functional bugs through GitHub Issues and propose code changes through pull
 requests. Keep existing tests passing and add regression coverage for behavior fixes.
 Document API-breaking changes explicitly in the contract and changelog; agree on
