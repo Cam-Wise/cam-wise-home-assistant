@@ -1,6 +1,7 @@
 # First beta release checklist
 
-Current source is public; this checklist does not authorize a tag or release.
+`v0.1.0-beta.1` is published as a limited developer-preview prerelease.
+This record does not authorize a further tag, release or HACS submission.
 
 ## Completed baseline (2026-10-16)
 
@@ -15,19 +16,24 @@ Current source is public; this checklist does not authorize a tag or release.
 
 ## Before v0.1.0-beta.1
 
-- [ ] Merge documentation PR through protected main; all four checks pass on the
+- [x] Merge documentation PR through protected main; all four checks pass on the
   exact release candidate. Verify final commit, manifest/runtime version and notes.
-- [ ] Record Windows packaged E2E evidence using the [manual plan](docs/windows-test-plan.md),
+- [x] Record Windows packaged E2E evidence using the [manual plan](docs/windows-test-plan.md),
   or explicitly approve a limited beta with Windows marked NOT PROVEN. Do not
   silently convert source-runtime evidence into Windows certification.
-- [ ] Owner approves the exact commit and draft [release notes](docs/release-notes-v0.1.0-beta.1.md),
+- [x] Owner approves the exact commit and draft [release notes](docs/release-notes-v0.1.0-beta.1.md),
   including trusted-LAN-only use and accepted != processed.
-- [ ] Obtain separate permission for immutable tag `v0.1.0-beta.1` and GitHub
+- [x] Obtain separate permission for immutable tag `v0.1.0-beta.1` and GitHub
   prerelease; verify which prereleases the installed HACS version offers.
+
+Owner approved the explicitly limited scope with Windows NOT PROVEN. Tag
+`v0.1.0-beta.1` points to `21516f8bff9fc8742bc215a602971a2b674f724d`, marked
+Pre-release and not Latest; no binary assets. Exact HACS 2.0.5 install/lifecycle
+passed on fresh HA 2026.10.1. No Windows certification is implied.
 
 ## After the approved first release
 
-- [ ] Test installing the exact released version in fresh HA and record HACS
+- [x] Test installing the exact released version in fresh HA and record HACS
   version/prerelease selection. Branch download evidence alone is insufficient.
 - [ ] When a later version is separately approved, run the real update/rollback
   [plan](docs/publication-plan.md#hacs-update-test-after-the-first-release).

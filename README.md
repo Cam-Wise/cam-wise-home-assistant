@@ -8,7 +8,8 @@ attention-required binary sensor. It does not provide camera streams or AI model
 Public source is available in
 [`cam-wise/cam-wise-home-assistant`](https://github.com/cam-wise/cam-wise-home-assistant).
 HACS custom-repository installation is validated; official HACS inclusion has not
-been requested. `v0.1.0-beta.1` is prepared but has no tag or GitHub release yet.
+been requested. [v0.1.0-beta.1](https://github.com/Cam-Wise/cam-wise-home-assistant/releases/tag/v0.1.0-beta.1)
+is a limited developer-preview prerelease, not a stable/Latest release.
 Maintainer: `@Bob-Cam-Wise`. No official HA quality tier is claimed.
 
 ## Verified compatibility
@@ -16,7 +17,7 @@ Maintainer: `@Bob-Cam-Wise`. No official HA quality tier is claimed.
 | Check | Result |
 | --- | --- |
 | HA 2025.2.0 / Python 3.13 and HA 2026.10.1 / Python 3.14 | PASS: 89 standalone tests per version; hosted lint/dependency checks pass |
-| HACS 2.0.5 custom install on HA 2026.10.1 | PASS: download, process restart, configuration, entities, reload and removal |
+| HACS 2.0.5 custom install on HA 2026.10.1 | PASS: exact v0.1.0-beta.1 selection/download, process restart, configuration, entities, reload and removal |
 | Linux Desktop 0.1.23 source-runtime E2E | PASS: real HA event, media download, ONNX inference and Review API/image |
 | Windows packaged Desktop E2E | NOT PROVEN; no tested packaged Desktop version range |
 

@@ -25,12 +25,15 @@ manual configuration works across routed trusted networks with TCP access.
 
 1. In HACS, open Custom repositories and add
    `https://github.com/cam-wise/cam-wise-home-assistant` as type **Integration**.
-2. Download Cam-Wise. Until the first tagged release, this installs the available
-   branch source; do not mistake the manifest version for a published release.
+2. Enable beta/prerelease visibility if needed and explicitly select
+   `v0.1.0-beta.1` for this developer preview. Download Cam-Wise; check that HACS
+   records that tag rather than a branch such as `main`.
 3. Restart HA, then add and configure Cam-Wise as described above.
 
-**PASS:** HACS 2.0.5 on HA 2026.10.1 downloaded the exact component files; separate
-HA processes verified configuration, three entities, reload and removal. HACS was
+**PASS:** in fresh HA 2026.10.1, HACS 2.0.5 recognized this exact prerelease with
+beta visibility enabled and installed it under `<HA config>/custom_components/cam_wise`.
+Component bytes matched release commit `21516f8`; separate HA processes verified
+configuration, three entities, reload and removal. HACS was
 controlled through its real websocket handlers, not visual frontend clicks.
 This is custom-repository support, not official HACS default-list inclusion.
 Windows packaged E2E remains **NOT PROVEN**; see [compatibility](compatibility.md).

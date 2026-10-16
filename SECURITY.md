@@ -11,8 +11,9 @@ guaranteed response or fix time.
 Support for ordinary bugs is [GitHub Issues](https://github.com/cam-wise/cam-wise-home-assistant/issues)
 in the public repository. Codeowner: `@Bob-Cam-Wise`. You may also use
 [GitHub private vulnerability reporting](https://github.com/Cam-Wise/cam-wise-home-assistant/security/advisories/new).
-The first maintained release candidate is prepared; no beta tag/release exists yet.
-After release, security maintenance targets the latest beta without a response-time guarantee.
+The maintained beta is `0.1.0-beta.1`, a limited developer-preview prerelease.
+Security maintenance targets the latest beta without a response-time guarantee;
+Windows packaged E2E remains NOT PROVEN.
 
 ## Threat model
 
