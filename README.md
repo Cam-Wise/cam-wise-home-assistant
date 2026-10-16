@@ -9,7 +9,9 @@ Public source is available in
 [`cam-wise/cam-wise-home-assistant`](https://github.com/cam-wise/cam-wise-home-assistant).
 HACS custom-repository installation is validated; official HACS inclusion has not
 been requested. [v0.1.0-beta.1](https://github.com/Cam-Wise/cam-wise-home-assistant/releases/tag/v0.1.0-beta.1)
-is a limited developer-preview prerelease, not a stable/Latest release.
+remains available as the historical technical test release. The planned regular
+release is `v0.1.0`, pending Windows packaged validation and release approval.
+See the [regular release preparation](docs/regular-release-preparation.md).
 Maintainer: `@Bob-Cam-Wise`. No official HA quality tier is claimed.
 
 ## Verified compatibility

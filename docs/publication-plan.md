@@ -1,10 +1,15 @@
-# Beta release, update test and HACS inclusion plan
+# Release, update test and HACS inclusion plan
 
 The repository is public and `v0.1.0-beta.1` is published as a limited developer
 prerelease at `21516f8bff9fc8742bc215a602971a2b674f724d`. No announcement or official
 HACS submission has been made; further releases and external publicity need their
 own approval. See the [release checklist](../PUBLICATION_CHECKLIST.md) and
 [draft notes](release-notes-v0.1.0-beta.1.md).
+
+The next target is regular `v0.1.0`, with product name **Cam-Wise**, without a
+prerelease label. Windows packaged E2E is a required project quality gate.
+The [preparation record](regular-release-preparation.md) separates official HACS
+requirements from project gates and contains the future submission checklist.
 
 ## First beta
 
@@ -41,8 +46,10 @@ release alone cannot prove an upgrade to a later one.
 The [official requirements](https://www.hacs.xyz/docs/publish/include/) require a
 public GitHub repository usable as a custom repository, green HACS Action without
 errors/ignores, green Hassfest for integrations, and a full GitHub release after
-those checks. Recheck these requirements before submission; prerelease sufficiency
-must be verified rather than assumed. Description/topics/Issues, valid manifests
+those checks. Our submission will use a regular release, even though the cited
+inclusion page does not impose a blanket ban on every prerelease. Its explicit
+alpha/beta prohibition concerns testing or overriding Core integrations.
+Description/topics/Issues, valid manifests
 and brand assets must remain correct.
 
 An owner or major contributor submits the repository alphabetically in the

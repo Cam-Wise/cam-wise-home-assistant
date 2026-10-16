@@ -1,5 +1,14 @@
 # Changelog
 
+## Planned 0.1.0 — not released
+
+- Prepare regular Cam-Wise publication and the official HACS submission checklist.
+- Require signed Windows packaged processing/lifecycle evidence before release.
+- Retain v0.1.0-beta.1 as the historical technical test release. Runtime version
+  remains unchanged until the Windows gate and final version PR pass.
+- [Release notes draft](docs/release-notes-v0.1.0.md); no release date or Windows
+  compatibility claim is assigned yet.
+
 ## 0.1.0-beta.1 — 2026-10-16 (developer-preview prerelease)
 
 - Prepare the first independent public integration beta for
