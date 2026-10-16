@@ -9,8 +9,10 @@ Security reports are handled confidentially. Access to this mailbox is restricte
 to authorized people, and it is monitored for security reports. There is no
 guaranteed response or fix time.
 Support for ordinary bugs is [GitHub Issues](https://github.com/cam-wise/cam-wise-home-assistant/issues)
-in the intended repository (not yet created/published). Codeowner: `@Bob-Cam-Wise`.
-Publication and release still require separate explicit approval.
+in the public repository. Codeowner: `@Bob-Cam-Wise`. You may also use
+[GitHub private vulnerability reporting](https://github.com/Cam-Wise/cam-wise-home-assistant/security/advisories/new).
+The first maintained release candidate is prepared; no beta tag/release exists yet.
+After release, security maintenance targets the latest beta without a response-time guarantee.
 
 ## Threat model
 
@@ -36,11 +38,13 @@ introduced by the integration itself.
 
 ## Distribution decision
 
-Explicit trusted-LAN use with documented limitations is a possible beta policy,
-subject to final owner confirmation and real installation evidence. Internet/untrusted-LAN
-use is blocked. If authenticated transport is required for the intended audience,
-stop that scope and approve a separate desktop/API design task. This repository
-does not invent an authentication protocol or promise security it cannot enforce.
+Use this integration only on an explicitly trusted LAN. HACS custom installation
+and lifecycle checks passed, but they do not establish Desktop listener security
+or packaged Windows E2E compatibility. Windows packaged E2E remains NOT PROVEN.
+See [compatibility](docs/compatibility.md) for the Linux source-runtime evidence.
+`accepted` is not `processed`; do not use acceptance as a safety-critical receipt.
+Internet/untrusted-LAN use is unsupported. Authenticated transport would require
+a separate Desktop/API design; no such protection is provided by API 1.
 
 HTTP redirects are not followed. Non-2xx outcomes are unknown for event delivery,
 never safe-not-sent evidence. Unexpected result labels are normalized before diagnostics.

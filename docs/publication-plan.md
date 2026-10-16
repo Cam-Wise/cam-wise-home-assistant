@@ -1,75 +1,57 @@
-# Beta publication and verification plan
+# Beta release, update test and HACS inclusion plan
 
-## Prepared choices (no publication authorization)
+The repository is public and HACS custom installation is validated. No tagged
+release, announcement or official HACS submission has been made. Each requires
+its own approval. See the [release checklist](../PUBLICATION_CHECKLIST.md) and
+[draft notes](release-notes-v0.1.0-beta.1.md).
 
-- Repository identity: `cam-wise/cam-wise-home-assistant`; codeowner: `@Bob-Cam-Wise`.
-  The human confirms organization settings/2FA; the repository is not yet created.
-- Intended first tag: `v0.1.0-beta.1`; manifest/runtime version: `0.1.0-beta.1`.
-- License: MIT for integration software/documentation; brand assets have separate terms.
-- Support: https://github.com/cam-wise/cam-wise-home-assistant/issues (intended
-  repository URL, available only after separately approved publication).
-- Confidential security route: `support@cam-wise.com`, supplied by the owner;
-  confidential access, monitoring and maintenance ownership are confirmed.
-- Network scope: explicitly trusted LAN only, no unauthenticated internet exposure.
-- Desktop and integration have independent versions, CI and release processes.
+## First beta
 
-These proposed choices prepare the source only. Repository creation, public push,
-tags/releases and official HACS submission are not authorized.
+Merge the documentation PR through protected main, require all four checks on the
+exact candidate, and record commit/manifest/runtime identity. Obtain owner approval
+for `v0.1.0-beta.1`, the release notes and the unproven Windows scope before creating
+an immutable tag and prerelease. No new Desktop release is required.
+After approval, verify a fresh HACS installation selects the exact released commit
+and version; record HACS's prerelease selection behavior. Do not call a main-branch
+download a successful tagged-release install. Do not change a published tag.
 
-## Before requesting GitHub publication approval
+## HACS update test after the first release
 
-1. Record real owner/codeowner, public commit attribution, repository/default branch,
-   documentation/issues URLs and support/security maintenance policy. Do not invent
-   GitHub handles or publish personal email addresses through Git configuration.
-2. Confirm legal copyright holder, rights for contributors/copied code and logo
-   sublicensing. MIT is not proof of provenance. Remove optional assets if rights
-   cannot be established; do not conceal unresolved rights issues.
-3. Complete independent code/security review and resolve blockers. Record reviewer,
-   exact source/package identity and findings. A same-author second pass is not an
-   independent review. Obtain explicit trust-policy approval.
-4. Prove HA-to-desktop event intake and desktop-to-HA media retrieval/processing in
-   disposable environments with synthetic media. Record exact source/build versions,
-   review-item result, retry/dedup, reload/restart, offline/recovery and teardown.
-   Do not substitute a synthetic desktop server for real desktop evidence.
-5. Run both pinned HA suites, dependency/lint/syntax/workflow checks and full official
-   hassfest. Run every HACS check possible without creating/pushing a repository;
-   identify GitHub-dependent checks as deferred, not passed or ignored.
-6. Export only reviewed allowlisted files into a fresh directory, verify byte hashes,
-   run a secrets/private-content scan and inspect the final archive. No monorepo
-   `.git`, old objects, remotes, internal reports, userdata or desktop dependencies.
-7. Owner approves the precise archive SHA, metadata, unresolved deferred checks and
-   the bounded post-publication plan. Request a new explicit GitHub publication command.
+1. In disposable HA, install the approved first release through HACS. Save versions,
+   commit, entity IDs, mapping and a configuration backup; use only a synthetic API.
+2. When a subsequent integration version is separately approved and available,
+   refresh HACS. Record whether it is offered under the chosen prerelease settings.
+   Verify release notes and expected source identity before accepting the update.
+3. Update through HACS, restart HA, and confirm new files/version plus preserved
+   config-entry/device/entity IDs and mapping. Check three entities, options,
+   offline/recovery and reload. Record behavior rather than assuming migration.
+4. Exercise a supported rollback/re-download of the prior immutable release in the
+   same disposable environment, restart, verify settings/entities, then remove the
+   entry and uninstall. If HACS cannot select it, record the limitation and restore
+   the test backup; do not claim native rollback PASS.
+5. Report PASS/FAIL/NOT TESTED with exact old/new versions and HACS version. Keep
+   credentials/media private. No fabricated tags or Desktop/account changes.
 
-## Immediately after separately authorized public GitHub creation
+Current evidence: refresh and same-main redownload passed without duplicate config
+entries. There is no version-to-version update evidence yet. Publishing the first
+release alone cannot prove an upgrade to a later one.
 
-1. Create the approved empty repository and import a **fresh history** from the
-   approved allowlist. Do not push/rewrite the private desktop repository history.
-   Verify new initial commit contains exactly approved files and public attribution.
-2. Verify repository visibility/name, description/topics, license display, README,
-   Issues, security policy, codeowners and default branch. Add GitHub required status
-   checks for HA 2025.2.0, HA 2026.10.1, HACS and Hassfest; no bypass/ignored checks.
-3. Run all Actions and official HACS validation against the actual GitHub identity.
-   Confirm every required job runs and passes. Record URLs, run IDs and commit SHA.
-4. Clone anonymously into a clean environment; verify contents/hashes/history and
-   no access to private repos, secrets or development paths. Independently run tests.
-5. Test actual HACS custom-repository install plus manual install in disposable HA,
-   followed by configure/reload/restart/remove and real desktop/media E2E. Test update
-   only when a separately authorized subsequent candidate/version is available;
-   don't fabricate a released upgrade or reuse an immutable published tag.
-6. If any security/rights/private-content or validator blocker appears, stop promotion
-   and releases. Notify owner and resolve before announcing install readiness. Do not
-   silently lower gates, force-push or treat deletion as revoking leaked credentials.
-7. Source publication and GitHub release publication are separate approvals. Only
-   create the intended beta tag/release after release approval and all release gates.
-   Reconfirm manifest/tag/source identity and beta limitations in release notes.
+## Official HACS inclusion, after separate permission
 
-## Later official HACS listing (new approval required)
+The [official requirements](https://www.hacs.xyz/docs/publish/include/) require a
+public GitHub repository usable as a custom repository, green HACS Action without
+errors/ignores, green Hassfest for integrations, and a full GitHub release after
+those checks. Recheck these requirements before submission; prerelease sufficiency
+must be verified rather than assumed. Description/topics/Issues, valid manifests
+and brand assets must remain correct.
 
-Public custom-repository usability does not equal official HACS inclusion. After
-successful public validation, installation/update evidence and an approved release,
-request another explicit permission before submitting to HACS default repositories.
-No submission, PR, tag, release or external announcement is authorized by this plan.
+An owner or major contributor submits the repository alphabetically in the
+`integration` file of `hacs/default`, following its current template. Use an
+editable PR from a personal fork/new branch based on its default branch, not an
+organization-owned submission fork. Passing checks does not guarantee acceptance.
+Our additional gate is recorded install/update evidence and a separate submission
+approval. No submission, fork, external PR or announcement is authorized by this plan.
 
-References: [HACS general](https://hacs.dev/docs/publish/start/),
-[HACS inclusion](https://hacs.dev/docs/publish/include/),
-[HACS action](https://hacs.dev/docs/publish/action/).
+References checked 2026-10-16:
+[HACS integration requirements](https://www.hacs.xyz/docs/publish/integration/),
+[HACS default inclusion](https://www.hacs.xyz/docs/publish/include/).
