@@ -7,7 +7,11 @@ own approval. See the [release checklist](../PUBLICATION_CHECKLIST.md) and
 [draft notes](release-notes-v0.1.0-beta.1.md).
 
 The next target is regular `v0.1.0`, with product name **Cam-Wise**, without a
-prerelease label. Windows packaged E2E is a required project quality gate.
+prerelease label. Its three source version fields are prepared at 0.1.0. The
+Windows packaged gate passed for signed Desktop 0.1.23 beta through a loopback
+transport relay; direct LAN/mDNS and other Desktop versions remain unproven.
+See [regular release notes](release-notes-v0.1.0.md). No regular tag/release exists
+yet; obtain separate approval after exact-source checks on merged main pass.
 The [preparation record](regular-release-preparation.md) separates official HACS
 requirements from project gates and contains the future submission checklist.
 

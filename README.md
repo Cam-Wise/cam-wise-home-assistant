@@ -10,7 +10,7 @@ Public source is available in
 HACS custom-repository installation is validated; official HACS inclusion has not
 been requested. [v0.1.0-beta.1](https://github.com/Cam-Wise/cam-wise-home-assistant/releases/tag/v0.1.0-beta.1)
 remains available as the historical technical test release. The planned regular
-release is `v0.1.0`, pending Windows packaged validation and release approval.
+release is `v0.1.0`, pending final source checks and separate release approval.
 See the [regular release preparation](docs/regular-release-preparation.md).
 Maintainer: `@Bob-Cam-Wise`. No official HA quality tier is claimed.
 
@@ -21,7 +21,7 @@ Maintainer: `@Bob-Cam-Wise`. No official HA quality tier is claimed.
 | HA 2025.2.0 / Python 3.13 and HA 2026.10.1 / Python 3.14 | PASS: 89 standalone tests per version; hosted lint/dependency checks pass |
 | HACS 2.0.5 custom install on HA 2026.10.1 | PASS: exact v0.1.0-beta.1 selection/download, process restart, configuration, entities, reload and removal |
 | Linux Desktop 0.1.23 source-runtime E2E | PASS: real HA event, media download, ONNX inference and Review API/image |
-| Windows packaged Desktop E2E | NOT PROVEN; no tested packaged Desktop version range |
+| Signed Windows Desktop 0.1.23 beta with HA 2026.10.1 | PASS: configuration/event/video/ONNX/Review/status/lifecycle, including actual restart, through a loopback transport relay; direct LAN/mDNS and other Desktop versions not proven |
 
 The HACS lifecycle test used a synthetic Desktop API and real HACS websocket
 handlers; it was not a visual UI test. It is separate from the Linux Desktop E2E.

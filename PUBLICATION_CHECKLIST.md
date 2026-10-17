@@ -1,4 +1,21 @@
-# First beta release checklist
+# Cam-Wise release checklist
+
+## Regular v0.1.0 preparation (2026-10-17)
+
+- [x] Record signed Windows Desktop 0.1.23 beta functional E2E, including actual
+  restart, through loopback transport relay; direct LAN/mDNS/other versions unproven.
+- [x] Align manifest, runtime and protocol fixture at 0.1.0; finalize notes,
+  changelog, installation and bounded public compatibility summary.
+- [ ] Verify all four required checks on the protected version PR and merged main;
+  record the exact green release commit in the maintainer handoff.
+- [ ] Obtain separate approval for immutable v0.1.0 tag/full regular GitHub release.
+- [ ] After publication, verify exact regular HACS selection/install and genuine
+  two-version update/rollback before the separately approved official submission.
+
+No release, tag, HACS application or announcement is authorized by this checklist.
+Historical beta record follows; its Windows limitations describe that prior decision.
+
+## Historical first beta
 
 `v0.1.0-beta.1` is published as a limited developer-preview prerelease.
 This record does not authorize a further tag, release or HACS submission.

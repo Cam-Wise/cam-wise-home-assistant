@@ -1,13 +1,17 @@
 # Changelog
 
-## Planned 0.1.0 — not released
+## 0.1.0 — prepared 2026-10-17, not released
 
-- Prepare regular Cam-Wise publication and the official HACS submission checklist.
-- Require signed Windows packaged processing/lifecycle evidence before release.
-- Retain v0.1.0-beta.1 as the historical technical test release. Runtime version
-  remains unchanged until the Windows gate and final version PR pass.
-- [Release notes draft](docs/release-notes-v0.1.0.md); no release date or Windows
-  compatibility claim is assigned yet.
+- Set manifest, runtime diagnostics and protocol fixture to regular version 0.1.0;
+  retain the existing API 1 functionality without new features.
+- Validate signed Windows Desktop 0.1.23 beta with HA 2026.10.1: configuration,
+  motion event, video retrieval, ONNX, Review, entity updates, reload, actual
+  shutdown/restart/reconnect and removal through a loopback transport relay.
+  Direct LAN/mDNS and other Desktop versions remain unproven.
+- Retain v0.1.0-beta.1 as the historical technical test release, unchanged.
+- Finalize [release notes](docs/release-notes-v0.1.0.md) and regular installation
+  instructions. Publishing requires separate approval; stable discovery and
+  two-version update/rollback remain post-publication checks.
 
 ## 0.1.0-beta.1 — 2026-10-16 (developer-preview prerelease)
 

@@ -1,14 +1,18 @@
 # Manual Windows compatibility test
 
-Status: plan only; Windows packaged E2E is NOT PROVEN. A user with a legitimate
-signed Cam-Wise installation and account can perform this small test after agreeing
-to its scope. Do not use a live camera or alter a working household installation.
+Status: reproduction plan. Signed Windows Desktop 0.1.23 beta passed functional
+E2E on 2026-10-17 through a loopback transport relay, including actual restart.
+See [compatibility](compatibility.md) for the evidence scope. Direct LAN/mDNS and
+other Desktop versions are not proven. A user with a legitimate signed installation
+and account can reproduce this test after agreeing its scope. Do not use a live
+camera or alter a working household installation.
 
 ## Prerequisite decision before starting
 
-The inspected signed Desktop 0.1.23 binary is genuine, but no supported isolated
-nonproduction account/issuer route has been established. Automatic testing stops
-here. A disposable account still using the normal account service requires the
+The completed test used a new regular Free account through normal production
+registration, email verification and owner-approved device coupling. No supported
+isolated nonproduction account/issuer route has been established. Reproduction
+with a disposable account using the normal account service requires the
 owner's explicit agreement to that service contact and confirmation that this
 test identity/device is safe to activate. A VM alone does not isolate cloud data.
 If service contact is excluded and no supported test issuer exists, report
