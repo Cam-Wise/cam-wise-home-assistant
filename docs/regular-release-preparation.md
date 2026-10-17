@@ -1,6 +1,9 @@
 # Cam-Wise regular release and HACS preparation
 
 Verified 2026-10-16 against public main `628a2ba0299273b74811dd88c3386428e9b5994a`.
+Updated 2026-10-17 from main `709698999eb7abc9a4aba66b48c0905aa07d1686` for
+the regular-version PR and completed scoped Windows evidence. Existing run links
+below are historical baseline evidence; final candidate checks must pass again.
 This is preparation, not release or submission approval. Product name: **Cam-Wise**;
 domain: `cam_wise`. Keep the existing beta tag/release immutable and available.
 
@@ -18,8 +21,8 @@ domain: `cam_wise`. Keep the existing beta tag/release immutable and available.
 | Core domain conflict | PASS at audit | Current Core dev tree contains neither cam_wise nor camwise component; HACS validator also passes |
 | Existing catalog duplicate | PASS at audit | No cam-wise/camwise repository in current hacs/default integration list; this is not a universal name reservation |
 | Full GitHub release after validators | PASS for historical beta | v0.1.0-beta.1 exists; this does not satisfy our regular-release decision |
-| Regular v0.1.0 | FAIL / pending | Not created; owner approval and Windows evidence required |
-| Windows signed packaged E2E | FAIL / not proven | Project quality gate, not a separate official HACS Windows requirement |
+| Regular v0.1.0 | Prepared / unpublished | Source version 0.1.0; green merged-source checks and separate publishing approval required |
+| Windows signed packaged E2E | PASS, scoped | Signed Desktop 0.1.23 beta, actual restart included, loopback transport relay; direct LAN/mDNS and other versions unproven |
 | Real release-to-release update/rollback | NOT TESTED | Project gate before submission; requires second approved release |
 
 Official requirements: [inclusion](https://www.hacs.xyz/docs/publish/include/),
@@ -32,15 +35,12 @@ Independent HACS/Core review may still identify conflicts or maintenance concern
 
 ## Smallest release sequence
 
-1. Complete the [Windows test](windows-test-plan.md) with legitimate isolated account
-   activation and record exact signed build, media/inference/Review and lifecycle.
-   Do not run another complete HACS/Linux E2E merely to reproduce existing proof.
-2. In one protected PR, set manifest.json `version`, const.py `INTEGRATION_VERSION`
-   and tests/fixtures/integration-status.json `version` to `0.1.0`. Add dated
-   CHANGELOG entry and final release notes with the actual Windows result. Replace
-   installation step 2 with selection of regular v0.1.0 without beta visibility.
-   These version changes are deliberately deferred until the quality gate passes;
-   the preparation branch remains honestly identified as the existing beta.
+1. Windows functional gate completed for the exact signed 0.1.23 beta build;
+   [compatibility](compatibility.md) records the claim and transport limitations.
+   Do not rerun complete HACS/Linux/Windows E2E merely to repeat existing proof.
+2. The protected version PR aligns manifest.json `version`, const.py
+   `INTEGRATION_VERSION` and tests/fixtures/integration-status.json at `0.1.0`,
+   and updates notes/changelog/installation. Historical beta remains unchanged.
 3. Run all four required checks on the exact proposed version and merged main.
    Review runtime/fixture identity through the existing metadata test. Record the
    final commit and check URLs; old green links cannot certify a changed version.
@@ -57,8 +57,9 @@ Independent HACS/Core review may still identify conflicts or maintenance concern
 
 Existing evidence covers custom HACS installation/configuration/entities/reload/
 removal, Linux source event/media/ONNX/Review, and source tests for temporary Desktop
-failure/recovery. Windows packaged processing and production account issuance are
-not inferred from that evidence. No existing implementation defect requires a refactor.
+failure/recovery. Separate signed Windows processing evidence is now recorded;
+no direct LAN or untested Desktop version support is inferred. No implementation
+defect requiring a refactor was observed.
 
 ## Future hacs/default submission packet (do not submit yet)
 

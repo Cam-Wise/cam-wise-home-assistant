@@ -1,6 +1,6 @@
 # Compatibility evidence
 
-Measured on 2026-10-16. These observations cover different scopes.
+Updated 2026-10-17. These observations cover different scopes.
 
 | Check | Result and scope |
 | --- | --- |
@@ -10,7 +10,7 @@ Measured on 2026-10-16. These observations cover different scopes.
 | API 1 | Only supported protocol; schema/client tests and source-runtime E2E |
 | HACS 2.0.5 on HA 2026.10.1 | PASS: custom repository recognized; exact v0.1.0-beta.1 prerelease installed with beta visibility enabled; restart/configuration/three entities/reload/removal |
 | Linux Desktop 0.1.23 source with HA 2026.10.1 | PASS: real event, HTTP video/hash, existing ONNX worker, saved detection and Review API/JPEG |
-| Windows packaged Desktop E2E | NOT PROVEN: no certified packaged version range |
+| Signed Windows Desktop 0.1.23 beta with HA 2026.10.1 | PASS: configuration, motion event, video download, ONNX inference, Review/image, status, reload, actual shutdown/restart/reconnect and removal via loopback transport relay; no direct LAN/mDNS or other Desktop-version claim |
 | Upgrade between released integration versions | NOT TESTED: only branch refresh/same-ref redownload tested |
 
 Hosted [HA tests](https://github.com/Cam-Wise/cam-wise-home-assistant/actions/runs/38944249283),
@@ -33,11 +33,25 @@ fixture is disabled in packaged mode and must not be injected into a signed app.
 It does not prove production account issuance, Windows packaging/DPAPI, model
 accuracy or real-camera support. UI HTML was fetched, not visually tested.
 
-Installed signed Windows 0.1.23 identity was verified, but the isolated E2E stopped
-before startup because no legitimate isolated nonproduction account path was
-available. This is an unexecuted test, not an observed product failure. Follow
-the [manual Windows plan](windows-test-plan.md); record exact build/hash and scope.
-Do not infer compatibility from the `0.1.23` value in synthetic API fixtures.
+On 2026-10-17, the actual signed Windows Desktop 0.1.23 beta passed functional E2E
+with actual HA 2026.10.1/Python 3.14, an isolated Windows profile/data root and a
+legitimate separately coupled Free account. Synthetic motion/video and an actual
+input-dependent ONNX graph exercised the unchanged packaged worker. One media
+download produced a Review detection and JPEG; status/review count/attention
+updated. Reload preserved mapping/entity IDs. Normal Desktop shutdown, actual
+restart, reconnect, Review persistence, entry removal and process/WebView/listener
+release passed. No account fixture, product patch, test trust or signature bypass
+was used. The signed EXE SHA-256 was
+`47fa791a04bec1b7e3b9f24435079ac6a3b3415bc08e67fffcefc78a727e9f11`.
+
+HA ran in WSL; a loopback transport relay forwarded real HTTP requests to the
+Windows API without synthesizing Desktop responses. Desktop LAN remained disabled.
+This does not prove direct LAN/mDNS, other Desktop versions, HA-minimum full Windows
+E2E, visual HAOS/HACS UI, real camera-vendor support or model accuracy. The earlier
+preflight account blocker is superseded for this exact build/route; no packaged
+version range is certified. See the [Windows reproduction plan](windows-test-plan.md).
+Internal logs, account data and camera media are not distributed with this evidence
+summary. Synthetic API fixture version strings alone are not compatibility proof.
 
 `accepted` means intake, not `processed`. API 1 has no durable correlated processing
 receipt; HA restarts discard pending work and FIFO media association is heuristic.

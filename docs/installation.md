@@ -25,9 +25,12 @@ manual configuration works across routed trusted networks with TCP access.
 
 1. In HACS, open Custom repositories and add
    `https://github.com/cam-wise/cam-wise-home-assistant` as type **Integration**.
-2. Enable beta/prerelease visibility if needed and explicitly select
-   `v0.1.0-beta.1` for this developer preview. Download Cam-Wise; check that HACS
-   records that tag rather than a branch such as `main`.
+2. Once the regular release is published, select **v0.1.0** without enabling
+   beta/prerelease visibility. Download Cam-Wise; check that HACS records that tag
+   rather than `main`. Until then, v0.1.0 is not available as a release: do not
+   substitute a branch download as proof of regular-release installation.
+   The historical v0.1.0-beta.1 remains separately selectable with prerelease
+   visibility when needed.
 3. Restart HA, then add and configure Cam-Wise as described above.
 
 **PASS:** in fresh HA 2026.10.1, HACS 2.0.5 recognized this exact prerelease with
@@ -36,7 +39,10 @@ Component bytes matched release commit `21516f8`; separate HA processes verified
 configuration, three entities, reload and removal. HACS was
 controlled through its real websocket handlers, not visual frontend clicks.
 This is custom-repository support, not official HACS default-list inclusion.
-Windows packaged E2E remains **NOT PROVEN**; see [compatibility](compatibility.md).
+Signed Windows Desktop 0.1.23 beta passed functional E2E through a loopback
+transport relay; direct LAN/mDNS and other Desktop versions remain unproven.
+See [compatibility](compatibility.md). Exact regular-tag install/discovery remains
+to be checked after the approved v0.1.0 release exists.
 
 ## Reload, restart, update, reconfigure
 
@@ -71,4 +77,5 @@ to process recordings. A fresh unlinked source desktop was observed returning
 Do not bypass account gates or expect rejected recordings to replay after coupling.
 `accepted` is not `processed`; confirm processing separately in Desktop/Review.
 Use only a trusted LAN: API 1 has no authentication or encryption. A manual
-[Windows test plan](windows-test-plan.md) is available; it is not a completed test.
+[Windows test plan](windows-test-plan.md) is available for reproduction; the exact
+signed 0.1.23 functional result and its limits are recorded in compatibility.
