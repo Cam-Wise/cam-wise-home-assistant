@@ -16,11 +16,11 @@
       },
       "confirm": {
         "title": "Cam-Wise gevonden",
-        "description": "Cam-Wise is gevonden op {host}:{port}. Versie: {version}. Omgeving: {environment}."
+        "description": "Cam-Wise is gevonden op {host}:{port}. Versie: {version}. Omgeving: {environment}.\n\nControleer of dit de bedoelde installatie is. WorkTest is een aparte testomgeving; bevestig deze alleen als je die bewust wilt koppelen."
       },
       "reconfigure": {
         "title": "Cam-Wise opnieuw configureren",
-        "description": "Werk het LAN-adres van deze Cam-Wise-installatie bij.",
+        "description": "Werk het LAN-adres van deze Cam-Wise-installatie bij. Camera-instellingen blijven bewaard. Een andere installatie moet je apart toevoegen.",
         "data": {
           "host": "Host- of IP-adres",
           "port": "API-poort"
@@ -32,14 +32,14 @@
       }
     },
     "error": {
-      "cannot_connect": "Kan geen verbinding maken met Cam-Wise.",
+      "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "invalid_host": "Voer een hostnaam of IP-adres in zonder pad of querystring.",
       "unsupported_api_version": "Deze Cam-Wise API-versie wordt niet ondersteund.",
       "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie."
     },
     "abort": {
       "already_configured": "Deze Cam-Wise-installatie is al geconfigureerd.",
-      "cannot_connect": "De gevonden Cam-Wise-installatie kon niet worden bereikt.",
+      "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "discovery_expired": "De gevonden Cam-Wise-installatie is niet meer beschikbaar. Voeg deze handmatig toe of wacht tot discovery opnieuw draait.",
       "reconfigure_successful": "De verbindingsgegevens van Cam-Wise zijn bijgewerkt.",
       "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund."

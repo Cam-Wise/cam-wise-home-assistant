@@ -16,11 +16,11 @@
       },
       "confirm": {
         "title": "Cam-Wise found",
-        "description": "Cam-Wise was found at {host}:{port}. Version: {version}. Environment: {environment}."
+        "description": "Cam-Wise was found at {host}:{port}. Version: {version}. Environment: {environment}.\n\nCheck that this is the intended installation. WorkTest is a separate test environment; only confirm it if you deliberately want to connect to it."
       },
       "reconfigure": {
         "title": "Reconfigure Cam-Wise",
-        "description": "Update the LAN address for this Cam-Wise installation.",
+        "description": "Update the LAN address for this Cam-Wise installation. Camera settings are preserved. Add a different installation separately.",
         "data": {
           "host": "Host or IP address",
           "port": "API port"
@@ -32,14 +32,14 @@
       }
     },
     "error": {
-      "cannot_connect": "Cannot connect to Cam-Wise.",
+      "cannot_connect": "Cam-Wise is unreachable. Check that Desktop is running and LAN access was explicitly enabled. If its address changed, update the connection using Reconfigure.",
       "invalid_host": "Enter a hostname or IP address without a path or query string.",
       "unsupported_api_version": "This Cam-Wise API version is not supported.",
       "different_device": "This address belongs to a different Cam-Wise installation."
     },
     "abort": {
       "already_configured": "This Cam-Wise installation is already configured.",
-      "cannot_connect": "The discovered Cam-Wise installation could not be reached.",
+      "cannot_connect": "Cam-Wise is unreachable. Check that Desktop is running and LAN access was explicitly enabled. If its address changed, update the connection using Reconfigure.",
       "discovery_expired": "The discovered Cam-Wise installation is no longer available. Add it manually or wait for discovery to run again.",
       "reconfigure_successful": "Cam-Wise connection details were updated.",
       "unsupported_api_version": "The discovered Cam-Wise API version is not supported."

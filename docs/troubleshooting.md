@@ -19,3 +19,21 @@ Diagnostics redact host and configured entity IDs and omit raw payloads/media ID
 Review diagnostics and logs manually before sharing: server strings are not proof of safe content. Desktop route-status POSTs
 contain entity/media identifiers on the LAN. Debug logs may expose operational
 metadata. Never attach credentials or real camera footage to an issue.
+
+## An old WorkTest entry keeps retrying
+
+A saved entry belongs to one Desktop installation ID, not whichever Cam-Wise is
+currently running at its address. An offline test installation does not imply lost
+Desktop data. HA retains the entry and retries; its three entities may be unavailable.
+
+- To use that same installation again, start it and check its network settings.
+- If only its host or port changed, use **Reconfigure** in the integration menu.
+  A different installation ID is rejected. Discovery may update the address of a
+  matching ID, but API 1 does not cryptographically authenticate that ID.
+- To use your normal Desktop instead, add it separately and deliberately confirm
+  its environment. Remove the old test entry only when you choose to do so.
+- Deleting an HA entry stops that entry's listeners and polling; it does not delete
+  Desktop datasets, Review history, account credentials or camera profiles.
+
+Never enable an old test runtime or broaden firewall access just to make a stale
+entry stop retrying. Check which installation you actually intend to use first.
