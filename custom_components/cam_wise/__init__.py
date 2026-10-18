@@ -84,8 +84,12 @@ def _persist_recommended_route_options(
 async def async_setup_entry(hass: HomeAssistant, entry: CamWiseConfigEntry) -> bool:
     """Set up Cam-Wise from a config entry."""
     client = CamWiseApiClient(
-        async_get_clientsession(hass), entry.data[CONF_HOST], entry.data[CONF_PORT]
+        async_get_clientsession(hass), entry.data[CONF_HOST], entry.data[CONF_PORT], entry.data.get("pairing_token")
     )
+    if entry.data.get("pairing_token") and getattr(hass, "http", None) and not hass.data.get("cam_wise_bridge_registered"):
+        from .bridge import CamWiseBridge
+        hass.http.register_view(CamWiseBridge)
+        hass.data["cam_wise_bridge_registered"] = True
     coordinator = CamWiseCoordinator(hass, client, entry)
     await coordinator.async_config_entry_first_refresh()
 
