@@ -7,9 +7,15 @@ from __future__ import annotations
 import hmac
 from aiohttp import web
 from homeassistant.components.http import HomeAssistantView, KEY_HASS
-from homeassistant.components.camera import async_get_image
 
 from .const import DOMAIN
+
+
+async def async_get_image(hass, entity_id, timeout=10):
+    # Camera dependencies belong to the installed camera integration. Status-only
+    # use must not import its optional image stack during Cam-Wise setup.
+    from homeassistant.components.camera import async_get_image as get_image
+    return await get_image(hass, entity_id, timeout=timeout)
 
 
 class CamWiseBridge(HomeAssistantView):
