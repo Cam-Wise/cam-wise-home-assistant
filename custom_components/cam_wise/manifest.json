@@ -1,6 +1,9 @@
 {
   "domain": "cam_wise",
   "name": "Cam-Wise",
+  "after_dependencies": [
+    "http"
+  ],
   "codeowners": [
     "@Bob-Cam-Wise"
   ],

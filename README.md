@@ -124,6 +124,8 @@ published HACS release. Do not replace a working HA installation for this test.
 In Desktop's Home Assistant settings, review the trusted-network warning and
 choose Connect. Add Cam-Wise in HA, confirm discovery (or use the displayed manual
 address), compare the code and approve in Desktop, then submit the HA form.
-Select the camera through the existing Desktop wizard once and explicitly choose
-HACS as that camera's event route. Select the suggested matching entities in HA.
+Select the camera from Available HA cameras in Desktop. This uses the existing
+camera-profile creation rules and explicitly selects HACS as its event route.
+An otherwise blank HA mapping adopts that choice on the next poll; existing
+nonempty mappings remain unchanged. The existing wizard remains available.
 A Desktop release predating this candidate does not contain these controls.
