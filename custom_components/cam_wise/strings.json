@@ -29,6 +29,13 @@
           "host": "The new local hostname or IP address for the same Cam-Wise installation.",
           "port": "The local API port exposed by Cam-Wise."
         }
+      },
+      "pair": {
+        "title": "Confirm in Cam-Wise Desktop",
+        "description": "Open Cam-Wise Desktop. Compare code {code} and choose Allow. Then submit this form. HTTP on your trusted home network can be intercepted; do not use a public or guest network.",
+        "data": {
+          "new_request": "New request (after denial or expiry)"
+        }
       }
     },
     "error": {
@@ -42,7 +49,8 @@
       "cannot_connect": "Cam-Wise is unreachable. Check that Desktop is running and LAN access was explicitly enabled. If its address changed, update the connection using Reconfigure.",
       "discovery_expired": "The discovered Cam-Wise installation is no longer available. Add it manually or wait for discovery to run again.",
       "reconfigure_successful": "Cam-Wise connection details were updated.",
-      "unsupported_api_version": "The discovered Cam-Wise API version is not supported."
+      "unsupported_api_version": "The discovered Cam-Wise API version is not supported.",
+      "reauth_successful": "Connection approved again."
     }
   },
   "options": {

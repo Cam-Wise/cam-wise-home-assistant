@@ -29,6 +29,13 @@
           "host": "De nieuwe lokale hostnaam of het nieuwe IP-adres van dezelfde Cam-Wise-installatie.",
           "port": "De lokale API-poort van Cam-Wise."
         }
+      },
+      "pair": {
+        "title": "Bevestig in Cam-Wise Desktop",
+        "description": "Open Cam-Wise Desktop. Vergelijk code {code} en kies Toestaan. Klik daarna hier op Verzenden. HTTP op je vertrouwde thuisnetwerk is afluisterbaar; gebruik geen openbaar of gastnetwerk.",
+        "data": {
+          "new_request": "Nieuwe aanvraag (na weigeren of verlopen)"
+        }
       }
     },
     "error": {
@@ -42,7 +49,8 @@
       "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "discovery_expired": "De gevonden Cam-Wise-installatie is niet meer beschikbaar. Voeg deze handmatig toe of wacht tot discovery opnieuw draait.",
       "reconfigure_successful": "De verbindingsgegevens van Cam-Wise zijn bijgewerkt.",
-      "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund."
+      "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund.",
+      "reauth_successful": "Koppeling opnieuw goedgekeurd."
     }
   },
   "options": {

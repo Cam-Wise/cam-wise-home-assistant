@@ -32,6 +32,10 @@ class CamWiseConnectionError(CamWiseApiError):
     """Cam-Wise could not be reached or returned an invalid payload."""
 
 
+class CamWiseAuthError(CamWiseConnectionError):
+    """Desktop approval is missing or revoked."""
+
+
 class CamWiseNotSentError(CamWiseConnectionError):
     """Connection establishment failed before sending the HTTP request."""
 
@@ -67,7 +71,8 @@ def base_url(host: str, port: int) -> str:
 class CamWiseApiClient:
     """Local Cam-Wise status and event API client."""
 
-    def __init__(self, session: ClientSession, host: str, port: int) -> None:
+    def __init__(self, session: ClientSession, host: str, port: int, token: str | None = None) -> None:
+        self._token = token
         self.host = normalize_host(host)
         self.port = int(port)
         self._session = session
@@ -77,8 +82,11 @@ class CamWiseApiClient:
     async def _get_json(self, path: str) -> dict[str, Any]:
         try:
             async with self._session.get(
-                f"{self._base_url}{path}", timeout=self._timeout, allow_redirects=False
+                f"{self._base_url}{path}", timeout=self._timeout, allow_redirects=False,
+                **({"headers": {"Authorization": f"Bearer {self._token}"}} if self._token else {})
             ) as response:
+                if response.status == 401:
+                    raise CamWiseAuthError("Desktop approval required")
                 response.raise_for_status()
                 if not 200 <= response.status < 300:
                     raise CamWiseConnectionError(
@@ -98,7 +106,10 @@ class CamWiseApiClient:
                 json=payload,
                 timeout=self._timeout,
                 allow_redirects=False,
+                **({"headers": {"Authorization": f"Bearer {self._token}"}} if self._token else {}),
             ) as response:
+                if response.status == 401:
+                    raise CamWiseAuthError("Desktop approval required")
                 response.raise_for_status()
                 if not 200 <= response.status < 300:
                     raise CamWiseConnectionError(
@@ -160,6 +171,9 @@ class CamWiseApiClient:
         ):
             raise CamWiseConnectionError("Cam-Wise returned an invalid mapping")
         return status
+
+    async def async_request_pairing(self, verifier: str) -> dict[str, Any]:
+        return await self._post_json("/integrations/home-assistant/pair", {"verifier": verifier})
 
     async def async_send_event(self, payload: dict[str, Any]) -> dict[str, Any]:
         return await self._post_json(EVENT_PATH, payload)

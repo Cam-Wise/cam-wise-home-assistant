@@ -25,7 +25,8 @@ Installing HACS alone does not replace it or prevent duplicate triggers.
 **Network security:** API 1 uses HTTP without authentication or encryption. Desktop
 LAN access is off by default and requires explicit consent. Do not expose it to the
 internet, public or guest networks. Restrict inbound access to the trusted HA host.
-A convenient secure pairing flow is not currently available.
+The local test candidate adds explicit Desktop approval and revocable tokens;
+HTTP remains unencrypted. See [the pairing test contract](docs/api-contract.md#local-pairing-test-candidate-011b0).
 
 ## Install with HACS
 
@@ -113,3 +114,16 @@ use GitHub private vulnerability reporting or support@cam-wise.com; see
 Contributions are welcome through pull requests; see [Contributing](CONTRIBUTING.md).
 The integration source is MIT licensed. Desktop and brand terms are separate;
 see [licensing](docs/licensing.md) and [LICENSE](LICENSE).
+
+
+### Trying the local pairing candidate
+
+The `0.1.1b0` source candidate is for manual installation in a separate disposable
+HA 2026.10.1 instance with the matching local Desktop test build. It is not a
+published HACS release. Do not replace a working HA installation for this test.
+In Desktop's Home Assistant settings, review the trusted-network warning and
+choose Connect. Add Cam-Wise in HA, confirm discovery (or use the displayed manual
+address), compare the code and approve in Desktop, then submit the HA form.
+Select the camera through the existing Desktop wizard once and explicitly choose
+HACS as that camera's event route. Select the suggested matching entities in HA.
+A Desktop release predating this candidate does not contain these controls.

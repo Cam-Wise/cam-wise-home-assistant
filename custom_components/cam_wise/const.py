@@ -1,7 +1,7 @@
 """Constants for the Cam-Wise integration."""
 
 DOMAIN = "cam_wise"
-INTEGRATION_VERSION = "0.1.0"
+INTEGRATION_VERSION = "0.1.1b0"
 PLATFORMS = ["sensor", "binary_sensor"]
 
 CONF_HOST = "host"
