@@ -43,6 +43,27 @@ class CamWiseBridge(HomeAssistantView):
         selected = str(options.get("camera_entity_id") or "")
         allowed = {str(options.get(k) or "") for k in
             ("camera_entity_id", "motion_entity_id", "ding_entity_id", "recording_entity_id")}
+        if resource.startswith("recordings/"):
+            from .recordings import async_list_recordings, async_download_recording
+            parts = resource.split("/")
+            approved = {selected} if selected else set()
+            extra = options.get("recording_camera_entities", [])
+            if isinstance(extra, list):
+                approved.update(e for e in extra if isinstance(e, str) and e.startswith("camera."))
+            if len(parts) < 2 or parts[1] not in approved:
+                return web.Response(status=403)
+            selected = parts[1]
+            try:
+                if len(parts) == 4 and parts[2] == "file":
+                    return await async_download_recording(hass, request, entry, selected, parts[3])
+                if len(parts) in (2, 3):
+                    return self.json(await async_list_recordings(hass, entry, selected, parts[2] if len(parts) == 3 else ""))
+                return web.Response(status=404)
+            except web.HTTPException:
+                raise
+            except Exception:
+                # Never return vendor URLs/credentials from underlying exceptions.
+                return self.json({"error": "ha_recording_read_failed"}, status_code=502)
         def serialized(state):
             value = dict(state.as_dict())
             if state.domain == "camera" and state.entity_id != selected:

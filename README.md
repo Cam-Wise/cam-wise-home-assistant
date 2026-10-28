@@ -129,3 +129,9 @@ camera-profile creation rules and explicitly selects HACS as its event route.
 An otherwise blank HA mapping adopts that choice on the next poll; existing
 nonempty mappings remain unchanged. The existing wizard remains available.
 A Desktop release predating this candidate does not contain these controls.
+
+### Existing recorded video input (local candidate)
+
+See [recorded video input](docs/recorded-video-input.md) for the five source
+adapters, explicit per-camera authorization and enablement, separate camera
+ownership, and current validation limits. This is not a published HACS release.

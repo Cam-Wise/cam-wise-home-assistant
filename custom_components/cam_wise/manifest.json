@@ -8,6 +8,7 @@
     "@Bob-Cam-Wise"
   ],
   "config_flow": true,
+  "dependencies": ["media_source"],
   "documentation": "https://github.com/cam-wise/cam-wise-home-assistant",
   "integration_type": "service",
   "iot_class": "local_polling",

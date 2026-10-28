@@ -139,7 +139,7 @@ async def test_options_advanced(hass, api, entry):
         result["flow_id"], {"choose_entities": True}
     )
     assert result["step_id"] == "advanced"
-    assert result["data_schema"]({}) == MAPPING
+    assert result["data_schema"]({}) == {**MAPPING, "recording_camera_entities": []}
     hass.states.async_set("event.other_motion", "unknown")
     changed = {**MAPPING, "motion_entity_id": " event.other_motion "}
     result = await hass.config_entries.options.async_configure(
@@ -200,3 +200,21 @@ async def test_suggestion_does_not_map_unrelated_entity_to_event_roles(hass, api
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["step_id"] == "advanced"
     hass.config_entries.options.async_abort(result["flow_id"])
+
+
+async def test_options_recording_cameras_validate_and_preserve(hass,api,entry):
+ hass.states.async_set('camera.second','idle')
+ result=await hass.config_entries.options.async_init(entry.entry_id)
+ result=await hass.config_entries.options.async_configure(result['flow_id'],{'choose_entities':True})
+ result=await hass.config_entries.options.async_configure(result['flow_id'],{**MAPPING,'recording_camera_entities':['camera.second']})
+ assert result['type']=='create_entry'
+ assert result['data']['recording_camera_entities']==['camera.second']
+ assert result['data']['camera_entity_id']==MAPPING['camera_entity_id']
+
+async def test_options_recording_cameras_reject_other_domains(hass,api,entry):
+ hass.states.async_set('sensor.private','value')
+ result=await hass.config_entries.options.async_init(entry.entry_id)
+ result=await hass.config_entries.options.async_configure(result['flow_id'],{'choose_entities':True})
+ from homeassistant import data_entry_flow
+ with pytest.raises(data_entry_flow.InvalidData):
+  await hass.config_entries.options.async_configure(result['flow_id'],{**MAPPING,'recording_camera_entities':['sensor.private']})

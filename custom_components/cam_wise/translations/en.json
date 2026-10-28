@@ -32,7 +32,7 @@
       },
       "pair": {
         "title": "Confirm in Cam-Wise Desktop",
-        "description": "Open Cam-Wise Desktop. Compare code {code} and choose Allow. Then submit this form. HTTP on your trusted home network can be intercepted; do not use a public or guest network.",
+        "description": "**Comparison code: {code}**\n\nOpen Cam-Wise Desktop and compare this code with its request. Choose Allow only if the codes match. Then submit this form. HTTP on your trusted home network can be intercepted; do not use a public or guest network.",
         "data": {
           "new_request": "New request (after denial or expiry)"
         }
@@ -42,7 +42,9 @@
       "cannot_connect": "Cam-Wise is unreachable. Check that Desktop is running and LAN access was explicitly enabled. If its address changed, update the connection using Reconfigure.",
       "invalid_host": "Enter a hostname or IP address without a path or query string.",
       "unsupported_api_version": "This Cam-Wise API version is not supported.",
-      "different_device": "This address belongs to a different Cam-Wise installation."
+      "different_device": "This address belongs to a different Cam-Wise installation.",
+      "approval_required": "Cam-Wise has not approved this request. Compare the code and choose Allow in Desktop before submitting here. If the request expired or was denied, open a new pairing window in Desktop and select New request here.",
+      "pairing_unavailable": "Cam-Wise is reachable but cannot accept a new request: another request is pending or the pairing window expired. Deny the old request in Desktop or let it expire. Then open a new pairing window and try a New request here."
     },
     "abort": {
       "already_configured": "This Cam-Wise installation is already configured.",
@@ -74,13 +76,15 @@
           "camera_entity_id": "Camera entity",
           "recording_entity_id": "Recording-ready entity",
           "motion_entity_id": "Motion entity",
-          "ding_entity_id": "Doorbell entity"
+          "ding_entity_id": "Doorbell entity",
+          "recording_camera_entities": "Cameras for recorded videos"
         },
         "data_description": {
           "camera_entity_id": "Camera entity used as the source camera in Cam-Wise review items.",
           "recording_entity_id": "Entity that exposes the latest media identifier when a recording is ready.",
           "motion_entity_id": "Entity whose state changes indicate motion events.",
-          "ding_entity_id": "Entity whose state changes indicate doorbell events."
+          "ding_entity_id": "Entity whose state changes indicate doorbell events.",
+          "recording_camera_entities": "Allow these cameras for existing video downloads. Each camera retains its own Cam-Wise dataset, model and queue. Enable receiving separately per camera in Cam-Wise."
         }
       }
     },

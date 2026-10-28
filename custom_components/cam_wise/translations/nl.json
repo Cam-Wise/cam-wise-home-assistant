@@ -32,7 +32,7 @@
       },
       "pair": {
         "title": "Bevestig in Cam-Wise Desktop",
-        "description": "Open Cam-Wise Desktop. Vergelijk code {code} en kies Toestaan. Klik daarna hier op Verzenden. HTTP op je vertrouwde thuisnetwerk is afluisterbaar; gebruik geen openbaar of gastnetwerk.",
+        "description": "**Vergelijkingscode: {code}**\n\nOpen Cam-Wise Desktop en vergelijk deze code met de aanvraag daar. Kies alleen bij gelijke codes Toestaan. Klik daarna hier op Verzenden. HTTP op je vertrouwde thuisnetwerk is afluisterbaar; gebruik geen openbaar of gastnetwerk.",
         "data": {
           "new_request": "Nieuwe aanvraag (na weigeren of verlopen)"
         }
@@ -42,7 +42,9 @@
       "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "invalid_host": "Voer een hostnaam of IP-adres in zonder pad of querystring.",
       "unsupported_api_version": "Deze Cam-Wise API-versie wordt niet ondersteund.",
-      "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie."
+      "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie.",
+      "approval_required": "Cam-Wise heeft deze aanvraag nog niet goedgekeurd. Vergelijk de code en kies daar Toestaan voordat je hier op Verzenden klikt. Is de aanvraag verlopen of geweigerd? Open in Cam-Wise een nieuwe koppelperiode en vink hier Nieuwe aanvraag aan.",
+      "pairing_unavailable": "Cam-Wise is bereikbaar, maar accepteert nu geen nieuwe aanvraag: er loopt al een aanvraag of de koppelperiode is verlopen. Wijs een oude aanvraag in Desktop af of laat die verlopen. Open daarna een nieuwe koppelperiode en probeer hier een Nieuwe aanvraag."
     },
     "abort": {
       "already_configured": "Deze Cam-Wise-installatie is al geconfigureerd.",
@@ -74,13 +76,15 @@
           "camera_entity_id": "Camera-entiteit",
           "recording_entity_id": "Opname-klaar-entiteit",
           "motion_entity_id": "Bewegingsentiteit",
-          "ding_entity_id": "Deurbelentiteit"
+          "ding_entity_id": "Deurbelentiteit",
+          "recording_camera_entities": "Camera’s voor video-opnames"
         },
         "data_description": {
           "camera_entity_id": "Camera-entiteit die als broncamera in Cam-Wise reviewitems wordt gebruikt.",
           "recording_entity_id": "Entiteit die de nieuwste media-identificatie geeft zodra een opname klaarstaat.",
           "motion_entity_id": "Entiteit waarvan statuswijzigingen bewegingsgebeurtenissen aangeven.",
-          "ding_entity_id": "Entiteit waarvan statuswijzigingen deurbelgebeurtenissen aangeven."
+          "ding_entity_id": "Entiteit waarvan statuswijzigingen deurbelgebeurtenissen aangeven.",
+          "recording_camera_entities": "Sta deze camera’s toe voor het ophalen van bestaande video-opnames. Iedere camera houdt in Cam-Wise een eigen dataset, model en wachtrij. Zet ophalen per camera aan in Cam-Wise."
         }
       }
     },

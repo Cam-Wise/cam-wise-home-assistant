@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 import hashlib
+import logging
 import secrets
 
 import voluptuous as vol
@@ -11,11 +12,13 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.core import State, callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .client import (
     CamWiseApiClient,
+    CamWiseAuthError,
     CamWiseConnectionError,
     CamWiseUnsupportedApiError,
     normalize_host,
@@ -34,6 +37,7 @@ from .const import (
 from .events import ROLE_DOMAINS, mapping_errors
 
 CONF_USE_RECOMMENDED = "use_recommended"
+_LOGGER = logging.getLogger(__name__)
 CONF_CHOOSE_ENTITIES = "choose_entities"
 
 _ROLE_LABELS = {
@@ -196,12 +200,20 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         data_updates={"pairing_token": self._pair_token}, reason="reauth_successful")
                 return self.async_create_entry(title=f"Cam-Wise ({self._info.get('environment', 'unknown')})",
                     data={**self._discovered, "pairing_token": self._pair_token})
-        except CamWiseConnectionError:
+        except CamWiseAuthError:
+            errors["base"] = "approval_required"
+        except CamWiseConnectionError as err:
             if not self._pair_code:
                 self._pair_token = None
-            errors["base"] = "cannot_connect"
+            status = getattr(err.__cause__, "status", None)
+            errors["base"] = "pairing_unavailable" if status == 409 else "cannot_connect"
+            # Diagnose transport/response failures without logging credentials,
+            # verification codes, payloads or request URLs.
+            _LOGGER.warning("Pairing step failed: cause=%s http_status=%s code_received=%s",
+                            type(err.__cause__).__name__ if err.__cause__ else type(err).__name__,
+                            status, bool(self._pair_code))
         return self.async_show_form(step_id="pair", data_schema=vol.Schema({vol.Optional("new_request", default=False): bool}),
-            errors=errors, description_placeholders={"code": self._pair_code})
+            errors=errors, description_placeholders={"code": self._pair_code or "—"})
 
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         self._reauth_entry = self._get_reauth_entry()
@@ -448,9 +460,16 @@ class CamWiseOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             cleaned = {
                 key: str(value or "").strip()
-                for key, value in user_input.items()
+                for key, value in user_input.items() if key != "recording_camera_entities"
             }
+            cameras = user_input.get("recording_camera_entities", [])
             errors = self._mapping_errors(cleaned)
+            if (not isinstance(cameras, list) or len(cameras) > 32 or
+                any(not isinstance(entity, str) or not entity.startswith("camera.") or
+                    self.hass.states.get(entity) is None for entity in cameras)):
+                errors["base"] = "invalid_mapping"
+            else:
+                cleaned["recording_camera_entities"] = list(dict.fromkeys(cameras))
             if not errors:
                 return self.async_create_entry(
                     title="", data={**self.config_entry.options, **cleaned}
@@ -461,6 +480,9 @@ class CamWiseOptionsFlow(config_entries.OptionsFlow):
             errors=errors,
             data_schema=vol.Schema(
                 {
+                    vol.Optional("recording_camera_entities",
+                        default=current.get("recording_camera_entities", [])):
+                        selector.EntitySelector(selector.EntitySelectorConfig(domain="camera", multiple=True)),
                     vol.Optional(
                         CONF_CAMERA_ENTITY,
                         default=current.get(CONF_CAMERA_ENTITY, ""),
