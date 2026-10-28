@@ -6,6 +6,7 @@ general media browser, URL proxy, live stream or background recording poller.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from urllib.parse import urlsplit
 
@@ -26,7 +27,7 @@ def _camera(hass, selected):
     return registered
 
 
-def _remember(hass, entry, selected, provider, identity, source, title):
+def _remember(hass, entry, selected, provider, identity, source, title, revision=None):
     cache = hass.data.setdefault(CACHE_KEY, {})
     now = hass.loop.time()
     for key, value in list(cache.items()):
@@ -39,7 +40,23 @@ def _remember(hass, entry, selected, provider, identity, source, title):
         "provider": provider, "identity": identity, "source": source,
         "expires": now + 900,
     }
-    return {"id": identifier, "title": str(title)[:160]}
+    logical = source
+    if provider == "reolink":
+        parts = source.removeprefix("media-source://reolink/").split("|")
+        # Channel/stream/start identify a recording, independent of its growing end.
+        if len(parts) != 7 or parts[0] != "FILE":
+            raise web.HTTPBadRequest(reason="recording_identity_unavailable")
+        logical = "|".join(parts[1:4] + [parts[-2]])
+    elif provider == "tapo_control":
+        day, start, _end = json.loads(source)
+        logical = json.dumps([day, start])
+    elif provider == "blink":
+        logical = urlsplit(source).path + "|" + str(title)
+        if revision is None:
+            revision = logical  # Signed access-token renewal is not new footage.
+    stable_key = hashlib.sha256((repr(identity) + provider + logical).encode()).hexdigest()[:32]
+    version = hashlib.sha256(str(revision if revision is not None else source).encode()).hexdigest()[:32]
+    return {"id": identifier, "key": stable_key, "revision": version, "title": str(title)[:160]}
 
 
 async def async_list_recordings(hass, entry, selected, day=""):
@@ -53,7 +70,7 @@ async def async_list_recordings(hass, entry, selected, day=""):
         return {"provider": registered.platform, "days": [], "day": "",
                 "availability": "available" if sources else "no_recordings",
                 "recordings": [_remember(hass, entry, selected, registered.platform,
-                               identity, source, title) for source, title in sources]}
+                               identity, row[0], row[1], row[2] if len(row) > 2 else None) for row in sources]}
     if registered.platform == "ring":
         state = hass.states.get(selected)
         attrs = state.attributes if state else {}

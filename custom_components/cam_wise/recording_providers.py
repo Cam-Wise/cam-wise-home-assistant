@@ -44,7 +44,7 @@ async def list_sources(hass, registered, selected):
             end=dt_util.utcnow(), limit=1000)
         rows = [r for r in rows if r.get("camera") == cam.device.id and r.get("end")
                 and r.get("start") and r.get("end") < dt_util.utcnow().timestamp() * 1000 - 10000]
-        return [(str(r["id"]), str(r["start"])) for r in
+        return [(str(r["id"]), str(r["start"]), str(r["start"]) + ":" + str(r["end"])) for r in
                 sorted(rows, key=lambda r: r["start"], reverse=True)[:100]]
     if provider == "blink":
         api = cam._camera

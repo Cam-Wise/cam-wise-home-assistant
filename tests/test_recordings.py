@@ -18,7 +18,7 @@ async def test_unifi_filter(hass,monkeypatch):
  rows=[{'id':'valid','camera':'selected','start':1,'end':2},{'id':'wrong','camera':'other','start':1,'end':2},{'id':'ongoing','camera':'selected','start':1,'end':None}]
  cam=NS(device=NS(id='selected'),data=NS(api=NS(is_public_only=False,get_events_raw=AsyncMock(return_value=rows))))
  monkeypatch.setattr(pro,'entity',lambda *a:cam)
- assert await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')==[('valid','1')]
+ assert await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')==[('valid','1','1:2')]
  cam.data.api.is_public_only=True
  with pytest.raises(web.HTTPConflict):await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')
 
@@ -36,7 +36,7 @@ async def test_tapo_fail_closed(hass,monkeypatch):
 async def test_provider_dispatch(hass,monkeypatch):
  for provider in ('unifiprotect','tapo_control','blink'):
   row=er.async_get(hass).async_get_or_create('camera',provider,'synthetic-'+provider)
-  monkeypatch.setattr(pro,'list_sources',AsyncMock(return_value=[('private-source','clip')]))
+  monkeypatch.setattr(pro,'list_sources',AsyncMock(return_value=[('["20261028",100,200]' if provider=='tapo_control' else 'private-source','clip')]))
   result=await rec.async_list_recordings(hass,NS(entry_id='cw'),row.entity_id)
   assert result['provider']==provider and 'private-source' not in str(result)
 
@@ -117,3 +117,27 @@ async def test_multiple_recording_cameras_explicitly_authorized(hass,hass_client
  assert [call.args[2] for call in reader.await_args_list]==['camera.front','camera.second','camera.third']
  assert (await client.get('/api/cam_wise_bridge/api/recordings/camera.private',headers=headers)).status==403
  assert reader.await_count==3
+
+@pytest.mark.parametrize('provider,before,after,title',[
+ ('reolink','media-source://reolink/FILE|entry|0|sub|first-name|start|end1','media-source://reolink/FILE|entry|0|sub|final-name|start|end2','clip'),
+ ('tapo_control','["20261028",100,124]','["20261028",100,131]','clip'),
+])
+async def test_growing_recording_has_stable_key_and_changed_revision(hass,provider,before,after,title):
+ entry=NS(entry_id='cw');identity=('vendor','device','unique')
+ a=rec._remember(hass,entry,'camera.a',provider,identity,before,title)
+ b=rec._remember(hass,entry,'camera.a',provider,identity,after,title)
+ assert a['key']==b['key'] and a['revision']!=b['revision'] and a['id']!=b['id']
+ other=rec._remember(hass,entry,'camera.b',provider,('other','device2','unique2'),before,title)
+ assert other['key']!=a['key']
+
+async def test_cloud_signed_url_rotation_is_not_a_new_recording(hass):
+ entry=NS(entry_id='cw');identity=('vendor','device','unique')
+ a=rec._remember(hass,entry,'camera.a','blink',identity,'https://vendor.test/clip/123?token=old','same timestamp')
+ b=rec._remember(hass,entry,'camera.a','blink',identity,'https://vendor.test/clip/123?token=new','same timestamp')
+ assert a['key']==b['key'] and a['revision']==b['revision']
+
+async def test_unifi_end_revision_changes_without_new_identity(hass):
+ entry=NS(entry_id='cw');identity=('vendor','device','unique')
+ a=rec._remember(hass,entry,'camera.a','unifiprotect',identity,'event123','clip','start:end1')
+ b=rec._remember(hass,entry,'camera.a','unifiprotect',identity,'event123','clip','start:end2')
+ assert a['key']==b['key'] and a['revision']!=b['revision']
