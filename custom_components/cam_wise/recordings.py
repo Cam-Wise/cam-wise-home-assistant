@@ -5,10 +5,11 @@ general media browser, URL proxy, live stream or background recording poller.
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import re
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from aiohttp import ClientTimeout, web
 from homeassistant.components import media_source
@@ -131,7 +132,7 @@ async def async_list_recordings(hass, entry, selected, day=""):
                     str(n.media_content_id).startswith("media-source://reolink/")]
         for node in sorted(playable, key=lambda n: n.identifier.split("|")[-2], reverse=True)[:100]:
             records.append(_remember(hass, entry, selected, "reolink", identity,
-                                     node.media_content_id, chosen + " Â· " + node.title))
+                                     node.media_content_id, chosen + " · " + node.title))
     return {"provider": "reolink", "recordings": records, "days": ordered_days,
             "day": chosen, "availability": "available" if records else "no_recordings"}
 
@@ -144,7 +145,8 @@ def _ring_recording_url(value):
         vendor = any(host == domain or host.endswith("." + domain)
                      for domain in ("ring.com", "amazonaws.com", "cloudfront.net"))
         phoenix = re.fullmatch(
-            r"download-[a-z]{2}(?:-[a-z]+)+-[0-9]+\.prod\.phoenix\.devices\.amazon\.dev", host)
+            r"(?:(?:[0-9]{1,3}-){3}[0-9]{1,3}\.)?download-[a-z]{2}(?:-[a-z]+)+-[0-9]+"
+            r"\.prod\.phoenix\.devices\.amazon\.dev", host)
         if (url.scheme != "https" or url.username or url.password or
                 url.port not in (None, 443) or url.fragment or not (vendor or phoenix)):
             raise ValueError()
@@ -182,20 +184,30 @@ async def async_download_recording(hass, request, entry, selected, identifier):
         raise web.HTTPNotFound(reason="recording_changed_refresh_list")
     url = _ring_recording_url(attrs.get("video_url"))
     session = async_get_clientsession(hass)
-    async with session.get(url.geturl(), allow_redirects=False,
-                           timeout=ClientTimeout(total=180, connect=15)) as upstream:
-        if upstream.status != 200 or upstream.content_type not in {"video/mp4", "application/octet-stream"}:
-            raise web.HTTPBadGateway(reason="recording_download_failed")
-        if upstream.content_length and upstream.content_length > MAX_BYTES:
-            raise web.HTTPRequestEntityTooLarge(max_size=MAX_BYTES, actual_size=upstream.content_length)
-        response = web.StreamResponse(headers={"Content-Type": "video/mp4", "Cache-Control": "no-store"})
-        await response.prepare(request)
-        size = 0
-        async for chunk in upstream.content.iter_chunked(65536):
-            size += len(chunk)
-            if size > MAX_BYTES:
-                request.transport.close()
+    async with asyncio.timeout(180):
+        for redirects in range(4):
+            async with session.get(url.geturl(), allow_redirects=False,
+                                   timeout=ClientTimeout(total=180, connect=15)) as upstream:
+                if upstream.status in {301, 302, 303, 307, 308}:
+                    location = upstream.headers.get("Location")
+                    if redirects == 3 or not location:
+                        raise web.HTTPBadGateway(reason="recording_redirect_limit")
+                    # Ring Phoenix routes regional links to a numbered delivery host.
+                    # Check every hop before connecting; never forward incoming headers.
+                    url = _ring_recording_url(urljoin(url.geturl(), location))
+                    continue
+                if upstream.status != 200 or upstream.content_type not in {"video/mp4", "application/octet-stream"}:
+                    raise web.HTTPBadGateway(reason="recording_download_failed")
+                if upstream.content_length and upstream.content_length > MAX_BYTES:
+                    raise web.HTTPRequestEntityTooLarge(max_size=MAX_BYTES, actual_size=upstream.content_length)
+                response = web.StreamResponse(headers={"Content-Type": "video/mp4", "Cache-Control": "no-store"})
+                await response.prepare(request)
+                size = 0
+                async for chunk in upstream.content.iter_chunked(65536):
+                    size += len(chunk)
+                    if size > MAX_BYTES:
+                        request.transport.close()
+                        return response
+                    await response.write(chunk)
+                await response.write_eof()
                 return response
-            await response.write(chunk)
-        await response.write_eof()
-        return response
