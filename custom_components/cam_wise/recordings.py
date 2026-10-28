@@ -131,9 +131,26 @@ async def async_list_recordings(hass, entry, selected, day=""):
                     str(n.media_content_id).startswith("media-source://reolink/")]
         for node in sorted(playable, key=lambda n: n.identifier.split("|")[-2], reverse=True)[:100]:
             records.append(_remember(hass, entry, selected, "reolink", identity,
-                                     node.media_content_id, chosen + " · " + node.title))
+                                     node.media_content_id, chosen + " Â· " + node.title))
     return {"provider": "reolink", "recordings": records, "days": ordered_days,
             "day": chosen, "availability": "available" if records else "no_recordings"}
+
+
+def _ring_recording_url(value):
+    """Validate vendor recording origins, including regional Amazon Phoenix delivery."""
+    try:
+        url = urlsplit(str(value or ""))
+        host = (url.hostname or "").lower()
+        vendor = any(host == domain or host.endswith("." + domain)
+                     for domain in ("ring.com", "amazonaws.com", "cloudfront.net"))
+        phoenix = re.fullmatch(
+            r"download-[a-z]{2}(?:-[a-z]+)+-[0-9]+\.prod\.phoenix\.devices\.amazon\.dev", host)
+        if (url.scheme != "https" or url.username or url.password or
+                url.port not in (None, 443) or url.fragment or not (vendor or phoenix)):
+            raise ValueError()
+        return url
+    except ValueError:
+        raise web.HTTPBadRequest(reason="recording_vendor_url_not_supported") from None
 
 
 async def async_download_recording(hass, request, entry, selected, identifier):
@@ -163,12 +180,7 @@ async def async_download_recording(hass, request, entry, selected, identifier):
     attrs = state.attributes if state else {}
     if "ring:" + str(attrs.get("last_video_id")) != record["source"]:
         raise web.HTTPNotFound(reason="recording_changed_refresh_list")
-    url = urlsplit(str(attrs.get("video_url") or ""))
-    host = (url.hostname or "").lower()
-    if (url.scheme != "https" or url.username or url.password or url.port not in (None, 443)
-            or not any(host == domain or host.endswith("." + domain)
-                       for domain in ("ring.com", "amazonaws.com", "cloudfront.net"))):
-        raise web.HTTPBadRequest(reason="recording_vendor_url_not_supported")
+    url = _ring_recording_url(attrs.get("video_url"))
     session = async_get_clientsession(hass)
     async with session.get(url.geturl(), allow_redirects=False,
                            timeout=ClientTimeout(total=180, connect=15)) as upstream:
