@@ -106,5 +106,11 @@
         "name": "Aandacht vereist"
       }
     }
+  },
+  "issues": {
+    "recording_desktop_update": {
+      "title": "Werk Cam-Wise Desktop bij voor video-invoer",
+      "description": "Deze Desktop-versie ondersteunt het betrouwbare opnametijdcontract niet. Werk Desktop bij voordat u automatische video-invoer inschakelt. Bestaande camera’s, datasets, modellen en Review-items blijven behouden."
+    }
   }
 }

@@ -106,5 +106,11 @@
         "name": "Attention required"
       }
     }
+  },
+  "issues": {
+    "recording_desktop_update": {
+      "title": "Update Cam-Wise Desktop for recorded videos",
+      "description": "This Desktop version does not support the reliable recording-time contract. Update Desktop before enabling automatic recorded-video intake. Existing cameras, datasets, models and Review items are preserved."
+    }
   }
 }

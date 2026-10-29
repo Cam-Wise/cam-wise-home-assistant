@@ -86,24 +86,9 @@ def timing(start, end=None, *, completed=False):
             "completed": bool(start and (completed or end and start < end))}
 
 
-def _reolink_timing(hass, entry_id, source):
-    try:
-        from homeassistant.components.reolink.util import get_host
-        zone = get_host(hass, entry_id).api.timezone()
-        if zone is None:
-            return timing(None)
-        parts = source.split("|")
-        # FILE times are structured device wall times; older SDKs parse dicts only.
-        if len(parts) != 7 or not all(re.fullmatch(r"\d{14}", p) for p in parts[-2:]):
-            return timing(None)
-        start = datetime.strptime(parts[-2], "%Y%m%d%H%M%S").replace(tzinfo=zone)
-        end = datetime.strptime(parts[-1], "%Y%m%d%H%M%S").replace(tzinfo=zone)
-        # Reject ambiguous DST wall times rather than guess which recording is newer.
-        if start.replace(fold=0).utcoffset() != start.replace(fold=1).utcoffset():
-            return timing(None)
-        return timing(start, end)
-    except (ImportError, AttributeError, ValueError, TypeError, IndexError):
-        return timing(None)
+def _reolink_timing(hass, entry_id, source, context=None):
+    from .reolink_time import metadata
+    return metadata(source, context or {})
 
 
 def _ring_timing(hass, selected, video_id):
@@ -184,18 +169,30 @@ async def async_list_recordings(hass, entry, selected, day=""):
     ordered_days = sorted(valid_days, reverse=True)[:32]
     chosen = day or (ordered_days[0] if ordered_days else "")
     records = []
+    clock = {}
     if chosen in valid_days:
         files = await media_source.async_browse_media(hass, valid_days[chosen].media_content_id)
         prefix = "FILE|" + choices[0].identifier.removeprefix("CAM|") + "|sub|"
         playable = [n for n in files.children or [] if n.can_play and
                     str(n.identifier or "").startswith(prefix) and
                     str(n.media_content_id).startswith("media-source://reolink/")]
+        if any(len(str(n.identifier).split("|")) != 7 for n in playable):
+            return {"provider": "reolink", "recordings": [], "days": ordered_days,
+                    "day": chosen, "availability": "reolink_time_metadata_unavailable"}
+        if playable:
+            from .reolink_time import read_clock
+            try:
+                clock = await read_clock(hass, registered.config_entry_id)
+            except Exception:
+                return {"provider": "reolink", "recordings": [], "days": ordered_days,
+                        "day": chosen, "availability": "recording_clock_unreliable"}
         for node in sorted(playable, key=lambda n: n.identifier.split("|")[-2], reverse=True)[:100]:
             records.append(_remember(hass, entry, selected, "reolink", identity,
                                      node.media_content_id, chosen + " · " + node.title,
-                                     timing=_reolink_timing(hass, registered.config_entry_id, node.media_content_id)))
+                                     timing=_reolink_timing(hass, registered.config_entry_id, node.media_content_id, clock)))
     return {"provider": "reolink", "recordings": records, "days": ordered_days,
-            "day": chosen, "availability": "available" if records else "no_recordings"}
+            "day": chosen, "availability": "available" if records else "no_recordings",
+            "time_basis": clock.get("time_basis", "")}
 
 
 def _ring_recording_url(value):

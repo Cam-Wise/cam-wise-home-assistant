@@ -4,5 +4,6 @@
   "environment": "test",
   "status": "online",
   "review_queue": 3,
-  "attention_required": true
+  "attention_required": true,
+  "recording_contract": 2
 }

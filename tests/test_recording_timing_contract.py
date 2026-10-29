@@ -77,25 +77,11 @@ async def test_blink_times_are_sorted_by_desktop_not_labels(hass, monkeypatch):
     ]["captured_at"] is None
 
 
-def test_reolink_uses_device_timezone_and_end(hass, monkeypatch):
-    from homeassistant.components.reolink import util
-
-    monkeypatch.setattr(
-        util,
-        "get_host",
-        lambda *a: NS(api=NS(timezone=lambda: timezone(timedelta(hours=2)))),
-    )
-    data = rec._reolink_timing(
-        hass,
-        "entry",
-        "media-source://reolink/FILE|entry|0|sub|file|20261028100000|20261028100100",
-    )
-    assert (
-        data["captured_at"]
-        == datetime(2026, 10, 28, 8, tzinfo=timezone.utc).timestamp()
-    )
+def test_reolink_uses_device_timezone_and_end(hass):
+    context = {"settings": {"Time": {"timeZone": -7200}, "Dst": {"enable": 0}}}
+    data = rec._reolink_timing(hass, "entry", "media-source://reolink/FILE|entry|0|sub|file|20261028100000|20261028100100", context)
+    assert data["captured_at"] == datetime(2026, 10, 28, 8, tzinfo=timezone.utc).timestamp()
     assert data["ended_at"] - data["captured_at"] == 60 and data["completed"]
-    monkeypatch.setattr(util, "get_host", lambda *a: NS(api=NS(timezone=lambda: None)))
     assert rec._reolink_timing(hass, "entry", "source")["captured_at"] is None
 
 
@@ -109,43 +95,12 @@ def test_tapo_requires_explicit_device_offset():
     }
 
 
-def test_reolink_real_sdk_timezone_reaches_metadata(hass, monkeypatch):
-    """Exercise the SDK timezone type on both supported HA dependency versions."""
-    from homeassistant.components.reolink import util
-    from reolink_aio.typings import Reolink_timezone
-
-    zone = Reolink_timezone(
-        {
-            "Time": {"timeZone": -3600},
-            "Dst": {
-                "enable": 0,
-                "offset": 1,
-                "startMon": 3,
-                "startWeek": 5,
-                "startWeekday": 0,
-                "startHour": 2,
-                "startMin": 0,
-                "startSec": 0,
-                "endMon": 10,
-                "endWeek": 5,
-                "endWeekday": 0,
-                "endHour": 3,
-                "endMin": 0,
-                "endSec": 0,
-            },
-        }
-    )
-    monkeypatch.setattr(util, "get_host", lambda *a: NS(api=NS(timezone=lambda: zone)))
-    data = rec._reolink_timing(
-        hass,
-        "entry",
-        "media-source://reolink/FILE|entry|0|sub|file|20261028100000|20261028100100",
-    )
-    assert data == {
-        "captured_at": datetime(2026, 10, 28, 9, tzinfo=timezone.utc).timestamp(),
-        "ended_at": datetime(2026, 10, 28, 9, 1, tzinfo=timezone.utc).timestamp(),
-        "completed": True,
-    }
+def test_reolink_fixed_offset_metadata(hass):
+    context = {"settings": {"Time": {"timeZone": -3600}, "Dst": {"enable": 0}}}
+    data = rec._reolink_timing(hass, "entry", "media-source://reolink/FILE|entry|0|sub|file|20261028100000|20261028100100", context)
+    assert data["captured_at"] == datetime(2026, 10, 28, 9, tzinfo=timezone.utc).timestamp()
+    assert data["ended_at"] == datetime(2026, 10, 28, 9, 1, tzinfo=timezone.utc).timestamp()
+    assert data["completed"]
 
 
 def test_old_reolink_file_identifier_does_not_invent_source_time(hass, monkeypatch):

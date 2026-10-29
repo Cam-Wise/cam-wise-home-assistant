@@ -1,84 +1,80 @@
-# Coordinated recording candidate — 2026-10-29
+# Recording compatibility gates — 2026-10-29
 
-Status: **BLOCKED**, source integration/review only. No tag, release or HACS catalog
-submission is authorized. Runtime source version is still 0.1.1b0; that identifier
-is shared by older candidates and cannot establish recording-contract support.
+The three source compatibility blockers are repaired locally. Ready for final
+validation under the support boundary below; no publication is implied. This
+revision has not been pushed or run through hosted CI. Earlier green CI belongs
+to the preceding checkpoint, not these changes. Runtime version remains 0.1.1b0;
+actual recording compatibility is negotiated by capability contract 2, not a
+version string shared by several development candidates. API 1 remains unchanged.
 
-## Source capture time
+## Support matrix
 
-Ring Core 2025.2.0 and 2026.10.1 retain the last vendor history event and only set
-the recording URL/video ID for status `ready`. The adapter requires that exact
-ID and its `created_at`, normalized from an aware datetime/ISO time. This is
-source event time, not the HA state update or file download time. Ring is latest
-only and requires recording entitlement; missing/mismatched history pauses intake.
-Real hardware acceptance of this new timing adapter is still required.
+| HA Core / bridge / Desktop | Automatic recording result |
+|---|---|
+| HA 2025.2.0, new bridge, contract-2 Desktop | General integration retained; real five-part Reolink FILE source blocked with Core update action |
+| HA 2026.10.1, new bridge, contract-2 Desktop | Reolink seven-part source supported if clock/settings/rules validate |
+| Either tested Core, new bridge, contract-2 Desktop | Ring remains latest ready event/video with exact source ID/time; other providers retain their existing prerequisites |
+| New bridge, old Desktop without contract 2 | Recording metadata and file requests blocked; HA Repair asks to update Desktop |
+| Old bridge, new Desktop | Explicit update refusal before enable; existing enabled setting retained but paused |
+| Untested intermediate/future versions | No blanket vendor guarantee; missing source capabilities block that source only |
 
-Reolink Core 2026.10.1 FILE identifiers contain SDK StartTime/EndTime values. The adapter
-uses the device timezone, not the server timezone or media-browser title. Both
-SDK versions now use a strict 14-digit standard-library parser, followed by
-explicit device-timezone attachment. SDK 0.11.9 only parses time dictionaries,
-whereas 0.21.18 also parses strings; the original adapter passed strings to both.
-The test dependency sets now explicitly install the matching vendor libraries.
+The general minimum stays 2025.2.0. A global increase would unnecessarily block
+working brands. Per-source actual metadata, not a guessed Core version cutoff,
+decides whether Reolink can supply reliable capture times.
 
-**Release blocker: older Reolink Core.** HA 2025.2.0 emits five-part FILE
-identifiers, without StartTime/EndTime. The current adapter requires seven parts
-for stable identity and source capture time. It cannot preserve recorded-video
-intake on that route; even green synthetic seven-part fixtures on HA 2025.2.0 do
-not prove otherwise. Resolve supported route/version negotiation or supply actual
-source timing through the older vendor API. Do not infer it from titles, filenames,
-discovery time or download time. Ring Core on that HA version does retain its event.
+## Source time and clock checks
 
-**Release blocker: Reolink DST.** SDK `Reolink_timezone` ignores `datetime.fold`.
-The current fold comparison therefore cannot reject an ambiguous rollback wall
-time. With synthetic DST rules and the actual 0.21.18 SDK, a wall time 30 minutes
-before its own rollback boundary is accepted as completed with one guessed UTC
-instant. Both occurrences have the same offset under fold=0/1. The SDK also
-computes calendar transitions itself; do not assume an IANA-zone test proves this
-type. Fixed-offset/no-DST tests pass but do not clear this blocker. Do not ship
-the Reolink timed route until ambiguity is demonstrably rejected or unambiguous
-source UTC/offset metadata is available. Do not substitute discovery time.
+Reolink SDK tzinfo ignores fold and its calendar transition calculation cannot be
+used as proof. Conversion now uses the device's raw GetTime UTC/DST configuration:
+seconds west of UTC, explicit DST offset and calendar transition rules. It computes
+the offset at recording time, handles northern/southern seasons, rejects malformed
+rules and checks both start and end. An autumn local time with two UTC candidates
+or a spring time with none is skipped as an individual recording. Other valid
+recordings continue. Skipped logical keys cannot later become late-old jobs when
+their metadata changes.
 
-Other routes remain conditional: UniFi needs full event API access and uses vendor
-event milliseconds; Tapo Cameras Control needs the explicit device offset and its
-custom API version; Blink needs aware clip times and is bounded to cached clips.
-Missing offsets, naive/local labels, future timestamps or unavailable metadata
-must pause with the Desktop timing message. No all-vendor hardware certification.
+A fresh read-only clock check rejects missing/wrong zone information, unsupported
+settings and excessive device skew. Clock reads taking more than five seconds are
+not accepted. The new-capture lower bound subtracts a conservative ten-second
+uncertainty margin; no file inside that uncertainty interval is called new. The
+30-second stable-revision and complete-media checks remain separate. Changed time
+rules reset the connected window; reconnect still never imports an offline backlog.
 
-## Mixed versions
+The device must have correct historical clock/timezone configuration. Firmware
+variants and manual historical clock rewrites cannot be universally certified from
+current settings. No title, download/discovery time, current UTC offset or filename
+timestamp is substituted. SDK PlaybackTime is not used as a universal UTC escape
+hatch: some SDK paths synthesize it from a filename, and virtual file splitting can
+retain the original PlaybackTime. Those are not proof of each chunk's capture time.
 
-| Desktop | HA bridge | Result |
-|---|---|---|
-| New timed intake | Matching new metadata | One explicit startup sample, then connected-window captures, subject to source timing validity |
-| New timed intake | Old IDs without stable key/revision | Explicit identity/update error; no download |
-| New timed intake | Stable IDs but no typed capture/completion | Explicit timing pause; enabled setting retained |
-| Older intake | New additive metadata | Older code ignores extra fields and retains its older intake/backlog policy |
-| No recording-intake support | New HA | No automatic recording feature is created by updating HA alone |
+Ring still uses matching event ID, aware source created_at and recording ready status.
+It needs recording entitlement and is latest-only. UniFi needs full event API access;
+Tapo Cameras Control needs its explicit device offset/custom API; Blink needs an
+aware source clip time. No new hardware certification is claimed.
 
-**Release blocker: mixed-version rollout.** Additive API 1 metadata does not make
-older Desktop obey the new policy. There is no negotiated recording-contract
-capability/minimum Desktop gate yet. A version label shared by several candidates
-is insufficient. Do not advertise the new guarantees to mixed pairs or silently
-update an existing working pair. Coordinated update and an explicit compatibility
-gate/message must be resolved before final release validation; no new API has been
-invented during this integration pass.
+## Contract 2 and user messages
 
-## Validation and remaining distribution work
+Desktop advertises contract 2 in discovery/authenticated status. The bridge requires
+that status and the matching per-request header for both listing and download. It
+returns contract 2 with metadata. Desktop verifies it before enable and on every
+listing, including revalidation before queue admission. Missing/unknown contracts
+never fall back to an older intake policy. New HA keeps legacy general/event use,
+but supplies an actionable EN/NL HA Repair and refuses new automatic video reads
+from an old Desktop. New Desktop supplies EN/NL update/source/clock/skip messages.
+No camera/model/dataset/Review deletion or re-pairing is required.
 
-The seven original Desktop edge regressions pass on the coordinated source.
-Source tests do not prove a packaged artifact. Historical physical Ring download
-and Reolink processing evidence predates the new time contract and is reused only
-for the unchanged download paths. Existing user data is not a test fixture.
+## Scoped verification and next gate
 
-Keep the public repository limited to this MIT HA component, public documentation,
-synthetic tests and CI. Use the protected PR; never merge private Desktop source or
-history here. Keep historical beta tags unchanged. Select fresh compatible release
-versions only after blockers are cleared; 0.1.23 Desktop and old draft 0.1.0 notes
-must not be silently reused for changed release bytes.
+Targeted DST, clock, old/new metadata, mixed-peer, Repair, authorization and Ring
+checks pass on HA 2025.2.0 and 2026.10.1. Relevant Desktop policy/contract, seven
+original edges, dedup, 30s readiness, pairing and EN/NL JavaScript checks pass.
+Unchanged broad test results are retained as historical evidence. Local Ruff and
+Hassfest dependencies/manifest/translations pass. Hosted full validation must run
+on the eventual approved push; no public push was authorized this session.
 
-After the blockers are cleared: require exact-source HA matrix, HACS, Hassfest and
-Desktop release checks; then one isolated unsigned packaged test on 8017 with a full
-WorkTest root. Test one explicit initial completed clip and one new clip for Ring
-and Reolink, no offline backlog/replay after restart/reconnect, and unchanged camera,
-model, Review and dataset ownership. Exercise pairing revocation/reconnect and full
-shutdown. Do not repeat unchanged large manual tests. Signing/publication require
-separate authorization.
+Next: exact-source final checks and coordinated packaged/hardware validation with
+actual source timestamps, DST skips, one startup sample/new clip, reconnect/no
+backlog, pairing revocation and preserved camera/model/Review ownership. Freeze
+distinct distribution versions before building final artifacts. Existing signed
+artifacts and historical beta tag remain immutable. No signing, release, tag,
+HACS catalog submission or production deployment is authorized.

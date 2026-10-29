@@ -121,3 +121,26 @@ nonempty mappings are never overwritten.
 
 Recording media remains subject to the existing camera integration's actual media
 attributes and availability. Snapshots are not advertised as video support.
+# Recorded-video compatibility capability (local candidate)
+
+API 1 is retained for general status/events. Automatic recorded-video intake
+additionally requires the exact integer `recording_contract: 2` from Desktop
+discovery/authenticated status and from HA recording-list responses. Each listing
+and file request must carry `X-Cam-Wise-Recording-Contract: 2`; the bridge also
+rechecks authenticated Desktop status. A missing, boolean, string or different
+contract is incompatible, regardless of the displayed development version.
+
+Incompatible Desktop receives HTTP 409 `desktop_recording_update_required` with
+safe EN/NL update text and a localized HA Repair. Missing bridge support gives
+Desktop `ha_recording_update_required` before activation, or pauses an already
+enabled camera without deleting its setting. There is no older-policy fallback.
+Normal pairing/event functionality is not globally disabled by this feature gate.
+
+Reolink source limitations return `reolink_time_metadata_unavailable` or
+`recording_clock_unreliable` as availability, with no recordings. Per-record
+`timing_error` values `recording_time_ambiguous`, `recording_time_nonexistent` and
+`recording_time_invalid` exclude only that logical recording. Valid Reolink rows
+carry `capture_margin: 10` seconds; connected-window admission uses the capture
+lower bound, independently of the existing 30-second revision stability gate.
+The safe time-rule `time_basis` fingerprint closes the window on configuration
+changes. No vendor credentials or resolved media URLs are included.

@@ -8,7 +8,7 @@ import hmac
 from aiohttp import web
 from homeassistant.components.http import HomeAssistantView, KEY_HASS
 
-from .const import DOMAIN
+from .const import DOMAIN, RECORDING_CONTRACT
 
 
 async def async_get_image(hass, entity_id, timeout=10):
@@ -36,7 +36,7 @@ class CamWiseBridge(HomeAssistantView):
         # A Desktop revocation also invalidates this reverse read capability.
         from .client import CamWiseApiError
         try:
-            await entry.runtime_data.client.async_status()
+            desktop_status = await entry.runtime_data.client.async_status()
         except CamWiseApiError:
             return web.Response(status=401)
         options = {**entry.data, **entry.options}
@@ -44,6 +44,13 @@ class CamWiseBridge(HomeAssistantView):
         allowed = {str(options.get(k) or "") for k in
             ("camera_entity_id", "motion_entity_id", "ding_entity_id", "recording_entity_id")}
         if resource.startswith("recordings/"):
+            if (type(desktop_status.get("recording_contract")) is not int or
+                    desktop_status["recording_contract"] != RECORDING_CONTRACT or
+                    request.headers.get("X-Cam-Wise-Recording-Contract") != str(RECORDING_CONTRACT)):
+                return self.json({"error": "desktop_recording_update_required",
+                    "message_en": "Update Cam-Wise Desktop before enabling automatic recorded videos.",
+                    "message_nl": "Werk Cam-Wise Desktop bij voordat u automatische video-invoer inschakelt."},
+                    status_code=409)
             from .recordings import async_list_recordings, async_download_recording
             parts = resource.split("/")
             approved = {selected} if selected else set()
@@ -57,7 +64,8 @@ class CamWiseBridge(HomeAssistantView):
                 if len(parts) == 4 and parts[2] == "file":
                     return await async_download_recording(hass, request, entry, selected, parts[3])
                 if len(parts) in (2, 3):
-                    return self.json(await async_list_recordings(hass, entry, selected, parts[2] if len(parts) == 3 else ""))
+                    return self.json({**await async_list_recordings(hass, entry, selected, parts[2] if len(parts) == 3 else ""),
+                                      "recording_contract": RECORDING_CONTRACT})
                 return web.Response(status=404)
             except web.HTTPException:
                 raise

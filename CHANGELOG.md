@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased integration candidate — 2026-10-29 (blocked)
+## Unreleased compatibility repairs — 2026-10-29 (local only)
+
+- Convert Reolink device wall times with explicit historical DST rules; skip
+  ambiguous/invalid individual times and pause structurally unreliable sources.
+- Retain general HA 2025.2.0 compatibility; block only Reolink sources without
+  the required capture metadata. Keep Ring's recorded-video route.
+- Negotiate recording contract 2 on both peers and recording requests. Provide
+  EN/NL update actions and HA Repair while retaining pairings and existing data.
+- Targeted source checks pass; final packaged/hardware validation and exact-head
+  hosted CI remain next. No release/version/tag or public push in this repair pass.
+
+## Previous integration checkpoint — 2026-10-29 (historical blockers)
 
 - Bring the paired local camera bridge, five existing-recording adapters, stable
   recording identity, and typed source capture/completion metadata into review.

@@ -13,6 +13,7 @@ CONF_RECORDING_ENTITY = "recording_entity_id"
 
 DEFAULT_PORT = 8000
 SUPPORTED_API_VERSION = "1"
+RECORDING_CONTRACT = 2
 UPDATE_INTERVAL_SECONDS = 30
 
 DISCOVERY_PATH = "/integrations/home-assistant/discovery-info"

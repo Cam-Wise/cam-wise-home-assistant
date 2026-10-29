@@ -11,7 +11,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .client import CamWiseApiClient, CamWiseApiError, CamWiseAuthError
-from .const import DOMAIN, UPDATE_INTERVAL_SECONDS
+from .const import DOMAIN, RECORDING_CONTRACT, UPDATE_INTERVAL_SECONDS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +42,14 @@ class CamWiseCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 _LOGGER.warning("Cam-Wise is unavailable: %s", err)
             self._last_update_failed = True
             raise UpdateFailed("Cam-Wise is unreachable. Start Desktop or use Reconfigure if its address changed") from err
+        if self.entry.data.get("pairing_token"):
+            from homeassistant.helpers import issue_registry as ir
+            issue_id = "recording_desktop_update_" + self.entry.entry_id
+            if type(data.get("recording_contract")) is not int or data["recording_contract"] != RECORDING_CONTRACT:
+                ir.async_create_issue(self.hass, DOMAIN, issue_id, is_fixable=False,
+                    severity=ir.IssueSeverity.WARNING, translation_key="recording_desktop_update")
+            else:
+                ir.async_delete_issue(self.hass, DOMAIN, issue_id)
         if self.entry.data.get("pairing_token") and data.get("recommended_route_options"):
             from . import _persist_recommended_route_options
             _persist_recommended_route_options(self.hass, self.entry, data)

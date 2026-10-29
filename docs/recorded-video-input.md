@@ -39,10 +39,35 @@ remain mandatory. Reolink uses its device timezone and structured FILE start/end
 UniFi uses event milliseconds, Tapo requires its explicit device offset, Blink uses
 a timezone-aware clip time, and Ring requires an exact matching last-event ID,
 created_at and ready recording status. Missing, naive, malformed or future capture
-times pause that camera with a clear Desktop message. No title, last_updated or
+times are never guessed. Invalid or ambiguous individual Reolink recordings are
+skipped with a visible message; unavailable source metadata or an untrustworthy
+device clock pauses only that source. No title, last_updated or
 first-seen timestamp is substituted. Older HA versions may therefore pause until
 both sides of this unreleased contract are integrated. HA state timestamps are not
 proof of when footage was captured.
+
+Both peers must explicitly support recording contract **2**. Desktop advertises it
+in discovery/authenticated status and sends it on each recording request. The HA
+bridge checks both the authenticated Desktop status and request contract, and
+returns its own contract in metadata. Older Desktop receives an HA Repair/update
+notice; newer Desktop refuses to enable intake with an older bridge. Existing
+pairings, cameras and user data remain intact. There is no older-policy fallback.
+
+Reolink uses explicit device UTC/DST rules, with calendar-correct transitions and
+zero/one/two possible UTC instants for a local time. Repeated autumn times and
+nonexistent spring times are skipped individually. A fresh read-only GetTime
+checks the clock; missing settings, unsupported rule shapes, excessive clock skew
+or an over-five-second clock read pause this source. New-capture boundaries include
+a conservative ten-second clock uncertainty margin, separate from the unchanged
+30-second stability gate. A changed time-rule fingerprint closes the connected
+window without importing its backlog. Discovery/download times never become capture
+times. Correct historical camera settings remain a source prerequisite; arbitrary
+manual rewriting of old device timestamps cannot be reconstructed.
+
+General HA minimum remains 2025.2.0. That Core's five-part Reolink FILE identifiers
+lack source start/end and explicitly disable automatic recordings for that source.
+HA 2026.10.1 seven-part identifiers are supported when its device-time metadata
+passes validation. Other brands are not blocked by an unsupported Reolink source.
 
 Logical recording identity, durable receipt preparation and queue admission receipts
 prevent duplicate jobs across process crashes, changed bytes and pruned terminal

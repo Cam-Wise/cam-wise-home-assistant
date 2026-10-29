@@ -162,7 +162,8 @@ async def test_blink_download_bound(hass, monkeypatch):
         )
 
 
-async def test_reolink_channel_binding(hass, monkeypatch):
+@pytest.mark.parametrize("with_source_times", [True, False])
+async def test_reolink_channel_binding(hass, monkeypatch, with_source_times):
     from datetime import timezone, datetime
     from homeassistant.components.reolink import util
 
@@ -196,6 +197,10 @@ async def test_reolink_channel_binding(hass, monkeypatch):
         can_play=True,
         title="wrong",
     )
+    if not with_source_times:
+        # Actual HA 2025.2.0 format: no source start/end in the FILE identifier.
+        clip.identifier = f"FILE|{eid}|0|sub|filename"
+        clip.media_content_id = "media-source://reolink/" + clip.identifier
 
     async def browse(hass, identifier):
         return NS(
@@ -208,7 +213,12 @@ async def test_reolink_channel_binding(hass, monkeypatch):
         )
 
     monkeypatch.setattr(rec.media_source, "async_browse_media", browse)
+    monkeypatch.setattr("custom_components.cam_wise.reolink_time.read_clock", AsyncMock(return_value={"settings": {"Time": {"timeZone": 0}, "Dst": {"enable": 0}}, "time_basis": "synthetic-zone", "capture_margin": 10}))
     result = await rec.async_list_recordings(hass, NS(entry_id="cw"), row.entity_id)
+    if not with_source_times:
+        assert result["availability"] == "reolink_time_metadata_unavailable"
+        assert not result["recordings"]
+        return
     assert len(result["recordings"]) == 1 and "wrong" not in str(result)
     assert (
         result["recordings"][0]["captured_at"]
@@ -233,7 +243,7 @@ async def test_recording_bridge_authorization(
     monkeypatch.setattr(rec, "async_list_recordings", reader)
     client = await hass_client()
     base = "/api/cam_wise_bridge/api/recordings/"
-    headers = {"Authorization": "Bearer synthetic-recordings"}
+    headers = {"Authorization": "Bearer synthetic-recordings", "X-Cam-Wise-Recording-Contract": "2"}
     assert (await client.get(base + "camera.front")).status == 401
     assert (await client.get(base + "camera.other", headers=headers)).status == 403
     assert reader.await_count == 0
@@ -265,7 +275,7 @@ async def test_multiple_recording_cameras_explicitly_authorized(
     reader = AsyncMock(return_value={"recordings": []})
     monkeypatch.setattr(rec, "async_list_recordings", reader)
     client = await hass_client()
-    headers = {"Authorization": "Bearer synthetic-multicam"}
+    headers = {"Authorization": "Bearer synthetic-multicam", "X-Cam-Wise-Recording-Contract": "2"}
     for entity in ("camera.front", "camera.second", "camera.third"):
         assert (
             await client.get(
