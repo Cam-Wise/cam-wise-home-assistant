@@ -190,7 +190,8 @@ async def async_list_recordings(hass, entry, selected, day=""):
                     str(n.media_content_id).startswith("media-source://reolink/")]
         for node in sorted(playable, key=lambda n: n.identifier.split("|")[-2], reverse=True)[:100]:
             records.append(_remember(hass, entry, selected, "reolink", identity,
-                                     node.media_content_id, chosen + " · " + node.title))
+                                     node.media_content_id, chosen + " · " + node.title,
+                                     timing=_reolink_timing(hass, registered.config_entry_id, node.media_content_id)))
     return {"provider": "reolink", "recordings": records, "days": ordered_days,
             "day": chosen, "availability": "available" if records else "no_recordings"}
 

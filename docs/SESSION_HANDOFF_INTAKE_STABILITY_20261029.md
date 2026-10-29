@@ -29,3 +29,7 @@ Next safe action: integrate BOTH companion source checkpoints, then separately
 authorize packaged/hardware validation; no publication is authorized here.
 Do not touch: existing HA runtime/config, Desktop installed8000, user datasets,
 models/Review, other worktrees, previous artifacts, paid-launch or cloud production.
+
+Final adapter-through-list check: Reolink structured times reach returned metadata;
+existing channel-authorization test asserts UTC capture and completed flag. Final
+54-test scoped rerun PASS in 2.74s after this wiring correction.
