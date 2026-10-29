@@ -1,4 +1,4 @@
-# Existing video recordings — local candidate
+# Existing video recordings â€” local candidate
 
 This feature requires the matching unreleased Desktop recording candidate. It is
 not a published compatibility promise or a hardware-test result for all brands.
@@ -23,17 +23,39 @@ cache; Desktop retries once it is complete. Ring needs its recording entitlement
 SDK/custom-integration changes can require adapter updates. No vendor credentials
 or resolved recording URLs are sent to the Desktop UI.
 
-Retries and duplicate checks are per camera and recording. Initial opt-in begins
-with the latest available recording. Later polls read recent available items
-(including the previous day for replay sources), not an unlimited historical
-archive. Latest-only providers cannot recover clips that HA never exposed before
-the next clip replaced them. Long offline periods or more clips than the bounded
-recent listing are not a lossless archive-replication guarantee.
+Explicit activation admits at most **one newest completed recording** from the
+bounded initial listing, after the common **30-second** stable-revision observation
+and complete-media validation. Subsequent automatic intake accepts only recordings
+captured after the active connected window began. An ordinary restart, detected
+connection failure, processing pause or polling gap closes that window; reconnect
+never creates another initial sample or replays its offline history. Explicit off/on
+creates a new one-item sample. Prior-day reads serve the explicit sample or an already
+identified pending recording only.
 
-Pause/account/route/network-revocation gates still apply. Disabling intake stops
-new delivery but preserves queued work and downloaded media under normal Cam-Wise
-retention. No user data is reset. One active delivery route per physical camera
-remains required. Free camera limits are unchanged.
+The matching Desktop candidate requires typed `captured_at` (UTC epoch seconds),
+`ended_at` (UTC seconds or null) and `completed` (boolean) in each metadata row.
+Ready clip endpoints may have no end time; stable observations and MP4 validation
+remain mandatory. Reolink uses its device timezone and structured FILE start/end,
+UniFi uses event milliseconds, Tapo requires its explicit device offset, Blink uses
+a timezone-aware clip time, and Ring requires an exact matching last-event ID,
+created_at and ready recording status. Missing, naive, malformed or future capture
+times pause that camera with a clear Desktop message. No title, last_updated or
+first-seen timestamp is substituted. Older HA versions may therefore pause until
+both sides of this unreleased contract are integrated. HA state timestamps are not
+proof of when footage was captured.
+
+Logical recording identity, durable receipt preparation and queue admission receipts
+prevent duplicate jobs across process crashes, changed bytes and pruned terminal
+queue history. Obsolete/untagged HA tasks are cancelled before claim and checked
+again before analysis. Disabling or reactivating preserves stored footage, Review,
+datasets and models; only obsolete execution is blocked. An analysis already holding
+the lifecycle lock finishes before an off/on transition takes effect. One active
+delivery route per physical camera and existing Free camera limits remain unchanged.
+
+This is bounded polling, not a lossless archive service. Sub-poll outages with no
+observable failure cannot be distinguished from uninterrupted connectivity; actual
+provider clocks, SDK metadata and all-brand hardware behavior still need acceptance.
+No reconnection-time or vendor-clock precision guarantee is inferred from mocks.
 
 Validation: synthetic source/authorization/queue tests only until the owner tests
 real recordings on the local candidate. Multiple-camera hardware acceptance,

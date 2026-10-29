@@ -9,6 +9,9 @@ import asyncio
 import hashlib
 import json
 import re
+import math
+from datetime import datetime
+from homeassistant.util import dt as dt_util
 from urllib.parse import urljoin, urlsplit
 
 from aiohttp import ClientTimeout, web
@@ -28,7 +31,7 @@ def _camera(hass, selected):
     return registered
 
 
-def _remember(hass, entry, selected, provider, identity, source, title, revision=None):
+def _remember(hass, entry, selected, provider, identity, source, title, revision=None, timing=None):
     cache = hass.data.setdefault(CACHE_KEY, {})
     now = hass.loop.time()
     for key, value in list(cache.items()):
@@ -57,7 +60,60 @@ def _remember(hass, entry, selected, provider, identity, source, title, revision
             revision = logical  # Signed access-token renewal is not new footage.
     stable_key = hashlib.sha256((repr(identity) + provider + logical).encode()).hexdigest()[:32]
     version = hashlib.sha256(str(revision if revision is not None else source).encode()).hexdigest()[:32]
-    return {"id": identifier, "key": stable_key, "revision": version, "title": str(title)[:160]}
+    return {"id": identifier, "key": stable_key, "revision": version, "title": str(title)[:160],
+            **(timing or {"captured_at": None, "ended_at": None, "completed": False})}
+
+
+def _epoch(value):
+    """Accept UTC epoch seconds or timezone-aware vendor datetimes; never local labels."""
+    try:
+        if isinstance(value, str):
+            value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if isinstance(value, datetime):
+            if value.tzinfo is None:
+                return None
+            value = value.timestamp()
+        if type(value) not in (float, int) or not math.isfinite(value):
+            return None
+        return float(value) if 0 < value <= dt_util.utcnow().timestamp() else None
+    except (ValueError, OverflowError, TypeError):
+        return None
+
+
+def timing(start, end=None, *, completed=False):
+    start, end = _epoch(start), _epoch(end)
+    return {"captured_at": start, "ended_at": end,
+            "completed": bool(start and (completed or end and start < end))}
+
+
+def _reolink_timing(hass, entry_id, source):
+    try:
+        from homeassistant.components.reolink.util import get_host
+        from reolink_aio.utils import reolink_time_to_datetime
+        zone = get_host(hass, entry_id).api.timezone()
+        if zone is None:
+            return timing(None)
+        parts = source.split("|")
+        start = reolink_time_to_datetime(parts[-2], zone)
+        end = reolink_time_to_datetime(parts[-1], zone)
+        # Reject ambiguous DST wall times rather than guess which recording is newer.
+        if start.replace(fold=0).utcoffset() != start.replace(fold=1).utcoffset():
+            return timing(None)
+        return timing(start, end)
+    except (ImportError, AttributeError, ValueError, TypeError, IndexError):
+        return timing(None)
+
+
+def _ring_timing(hass, selected, video_id):
+    from .recording_providers import entity
+    try:
+        event = entity(hass, selected)._last_event or {}
+        if str(event.get("id")) != str(video_id):
+            return timing(None)
+        return timing(event.get("created_at"),
+                      completed=(event.get("recording") or {}).get("status") == "ready")
+    except (AttributeError, web.HTTPException):
+        return timing(None)
 
 
 async def async_list_recordings(hass, entry, selected, day=""):
@@ -71,7 +127,8 @@ async def async_list_recordings(hass, entry, selected, day=""):
         return {"provider": registered.platform, "days": [], "day": "",
                 "availability": "available" if sources else "no_recordings",
                 "recordings": [_remember(hass, entry, selected, registered.platform,
-                               identity, row[0], row[1], row[2] if len(row) > 2 else None) for row in sources]}
+                               identity, row[0], row[1], row[2] if len(row) > 2 else None,
+                               row[3] if len(row) > 3 else None) for row in sources]}
     if registered.platform == "ring":
         state = hass.states.get(selected)
         attrs = state.attributes if state else {}
@@ -79,7 +136,8 @@ async def async_list_recordings(hass, entry, selected, day=""):
         records = []
         if video_id is not None and attrs.get("video_url"):
             records.append(_remember(hass, entry, selected, "ring", identity,
-                           "ring:" + str(video_id), "Latest Ring recording"))
+                           "ring:" + str(video_id), "Latest Ring recording",
+                           timing=_ring_timing(hass, selected, video_id)))
         return {"provider": "ring", "recordings": records, "days": [], "day": "",
                 "availability": "latest_only" if records else "enable_last_recording_and_subscription"}
 

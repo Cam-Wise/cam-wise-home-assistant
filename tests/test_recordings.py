@@ -18,7 +18,7 @@ async def test_unifi_filter(hass,monkeypatch):
  rows=[{'id':'valid','camera':'selected','start':1,'end':2},{'id':'wrong','camera':'other','start':1,'end':2},{'id':'ongoing','camera':'selected','start':1,'end':None}]
  cam=NS(device=NS(id='selected'),data=NS(api=NS(is_public_only=False,get_events_raw=AsyncMock(return_value=rows))))
  monkeypatch.setattr(pro,'entity',lambda *a:cam)
- assert await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')==[('valid','1','1:2')]
+ assert await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')==[('valid','1','1:2',{'captured_at':.001,'ended_at':.002,'completed':True})]
  cam.data.api.is_public_only=True
  with pytest.raises(web.HTTPConflict):await pro.list_sources(hass,NS(platform='unifiprotect'),'camera.selected')
 
@@ -26,7 +26,7 @@ async def test_blink_origin(hass,monkeypatch):
  api=NS(recent_clips=[{'clip':'https://evil.test/a.mp4','time':'today'},{'clip':'https://vendor.test/old.mp4','time':'old'}],clip='https://vendor.test/new.mp4',last_record='today',sync=NS(urls=NS(base_url='https://vendor.test')))
  monkeypatch.setattr(pro,'entity',lambda *a:NS(_camera=api))
  rows=await pro.list_sources(hass,NS(platform='blink'),'camera.selected')
- assert len(rows)==2 and all('evil' not in s for s,t in rows)
+ assert len(rows)==2 and all('evil' not in row[0] for row in rows)
 
 async def test_tapo_fail_closed(hass,monkeypatch):
  monkeypatch.setattr(pro,'entity',lambda *a:object())

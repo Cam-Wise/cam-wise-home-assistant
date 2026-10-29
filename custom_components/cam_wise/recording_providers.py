@@ -33,8 +33,17 @@ def tapo_device(hass, registered, selected):
     return matches[0]
 
 
+def _tapo_timing(device, start, end):
+    from .recordings import timing
+    offset = device.get("timezoneOffset")
+    if type(offset) not in (int, float) or not -86400 <= offset <= 86400:
+        return timing(None)
+    return timing(start - offset, end - offset)
+
+
 async def list_sources(hass, registered, selected):
     """Return internal stable identities and labels; URLs never leave HA."""
+    from .recordings import timing
     provider = registered.platform
     cam = entity(hass, selected)
     if provider == "unifiprotect":
@@ -44,7 +53,8 @@ async def list_sources(hass, registered, selected):
             end=dt_util.utcnow(), limit=1000)
         rows = [r for r in rows if r.get("camera") == cam.device.id and r.get("end")
                 and r.get("start") and r.get("end") < dt_util.utcnow().timestamp() * 1000 - 10000]
-        return [(str(r["id"]), str(r["start"]), str(r["start"]) + ":" + str(r["end"])) for r in
+        return [(str(r["id"]), str(r["start"]), str(r["start"]) + ":" + str(r["end"]),
+                 timing(r["start"] / 1000, r["end"] / 1000)) for r in
                 sorted(rows, key=lambda r: r["start"], reverse=True)[:100]]
     if provider == "blink":
         api = cam._camera
@@ -57,8 +67,9 @@ async def list_sources(hass, registered, selected):
         for row in rows:
             url = urlsplit(str(row.get("clip") or ""))
             if url.scheme == "https" and (url.hostname, url.port) == (origin.hostname, origin.port):
-                result[url.geturl()] = str(row.get("time") or "Blink recording")
-        return list(result.items())[-100:]
+                result[url.geturl()] = row.get("time")
+        return [(url, str(when or "Blink recording"), None, timing(when, completed=True))
+                for url, when in list(result.items())[-100:]]
     if provider == "tapo_control":
         from custom_components.tapo_control.utils import getRecordings
         device = tapo_device(hass, registered, selected)
@@ -72,7 +83,8 @@ async def list_sources(hass, registered, selected):
                 for row in item.values():
                     start, end = int(row["startTime"]), int(row["endTime"])
                     if start < end < now - 15:
-                        rows.append((json.dumps([day, start, end]), str(start)))
+                        rows.append((json.dumps([day, start, end]), str(start), None,
+                                     _tapo_timing(device, start, end)))
         return sorted(rows, key=lambda row: json.loads(row[0])[1], reverse=True)[:100]
     raise web.HTTPBadRequest(reason="recording_provider_not_supported")
 
@@ -110,7 +122,7 @@ async def download_source(hass, request, registered, selected, source):
             cam.data.api.bootstrap.nvr.id, source)
     if registered.platform == "blink":
         # Revalidate membership and camera immediately before SDK authenticated read.
-        if source not in dict(await list_sources(hass, registered, selected)):
+        if source not in {row[0] for row in await list_sources(hass, registered, selected)}:
             raise web.HTTPNotFound(reason="recording_expired")
         upstream = await cam._camera.get_video_clip(url=source)
         try:
