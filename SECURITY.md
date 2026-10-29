@@ -15,7 +15,28 @@ The maintained beta is `0.1.0-beta.1`, a limited developer-preview prerelease.
 Security maintenance targets the latest beta without a response-time guarantee;
 Windows packaged E2E remains NOT PROVEN.
 
-## Threat model
+## Unreleased paired candidate
+
+The unreleased candidate adds explicit local discovery/pairing and revocable,
+installation-scoped capabilities. The general Desktop API stays on loopback;
+the separate HA listener exposes only the approved integration operations. Camera
+reads require both the pairing capability and authorization for that camera.
+Revocation denies subsequent bridge reads. Vendor credentials remain in HA.
+
+Trusted-home HTTP is an explicit opt-in, not encrypted transport. A local attacker
+able to intercept traffic can steal a bearer capability; a compromised HA host is
+inside this trust boundary. Do not expose either service to the Internet or guest
+networks. Discovery alone never authenticates a peer. Pairing does not grant access
+to Desktop accounts, datasets, models, training or general management APIs.
+
+Recording reads are bounded. Ring recording redirects are the only newly permitted
+vendor redirect path: at most three hops, with every HTTPS origin checked before
+connection and no incoming browser/pairing headers forwarded. General Desktop/HA
+API redirects remain refused. Recording capture times must come from the source;
+discovery/download times are not substitutes. See the current
+[release compatibility gates](docs/release-integration-gates-20261029.md).
+
+## Historical published beta threat model
 
 The desktop local API uses HTTP without authentication. LAN opt-in and firewall
 restrictions are deployment controls, not sender authentication. An untrusted LAN
@@ -37,7 +58,7 @@ metadata and are not anonymous. Logs use generic client errors; third-party HA
 and desktop logs need separate review. No telemetry or external cloud request is
 introduced by the integration itself.
 
-## Distribution decision
+## Historical published beta distribution decision
 
 Use this integration only on an explicitly trusted LAN. HACS custom installation
 and lifecycle checks passed, but they do not establish Desktop listener security

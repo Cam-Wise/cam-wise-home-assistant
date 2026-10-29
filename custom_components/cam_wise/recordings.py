@@ -89,13 +89,15 @@ def timing(start, end=None, *, completed=False):
 def _reolink_timing(hass, entry_id, source):
     try:
         from homeassistant.components.reolink.util import get_host
-        from reolink_aio.utils import reolink_time_to_datetime
         zone = get_host(hass, entry_id).api.timezone()
         if zone is None:
             return timing(None)
         parts = source.split("|")
-        start = reolink_time_to_datetime(parts[-2], zone)
-        end = reolink_time_to_datetime(parts[-1], zone)
+        # FILE times are structured device wall times; older SDKs parse dicts only.
+        if len(parts) != 7 or not all(re.fullmatch(r"\d{14}", p) for p in parts[-2:]):
+            return timing(None)
+        start = datetime.strptime(parts[-2], "%Y%m%d%H%M%S").replace(tzinfo=zone)
+        end = datetime.strptime(parts[-1], "%Y%m%d%H%M%S").replace(tzinfo=zone)
         # Reject ambiguous DST wall times rather than guess which recording is newer.
         if start.replace(fold=0).utcoffset() != start.replace(fold=1).utcoffset():
             return timing(None)

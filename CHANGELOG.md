@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased integration candidate — 2026-10-29 (blocked)
+
+- Bring the paired local camera bridge, five existing-recording adapters, stable
+  recording identity, and typed source capture/completion metadata into review.
+- Keep bounded Ring Phoenix downloads and validated redirects. No live recording
+  or snapshot substitute is added.
+- Remove the newer-SDK-only FILE parser dependency; pin matching vendor SDKs in
+  the two test environments. Keep the existing minimum/current HA matrix.
+- Source identity remains 0.1.1b0; no regular version, tag or release is selected.
+  Reolink DST ambiguity and coordinated Desktop/HA upgrade guarantees remain
+  release gates. See [compatibility gates](docs/release-integration-gates-20261029.md).
+
+The older prepared 0.1.0 notes below do not describe this candidate or authorize
+publication. They must be replaced when the final coordinated source is frozen.
+
 ## 0.1.0 — prepared 2026-10-17, not released
 
 - Set manifest, runtime diagnostics and protocol fixture to regular version 0.1.0;
