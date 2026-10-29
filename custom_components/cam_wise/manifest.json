@@ -2,7 +2,9 @@
   "domain": "cam_wise",
   "name": "Cam-Wise",
   "after_dependencies": [
-    "http"
+    "http",
+    "reolink",
+    "unifiprotect"
   ],
   "codeowners": [
     "@Bob-Cam-Wise"
