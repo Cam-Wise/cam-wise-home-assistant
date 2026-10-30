@@ -1,5 +1,39 @@
 # Compatibility evidence
 
+## Current recording candidate — 2026-10-30
+
+This section supersedes historical transport/security and recording claims below.
+The candidate remains 0.1.1b0, unpublished; it is not the prepared old v0.1.0.
+Recording contract 2 is required on both authenticated peers and every recording
+request. Pairing and explicit revocable authorization are required. Missing or
+incompatible contracts block automatic video intake; updating only one peer does
+not authorize fallback to the old intake behavior.
+
+- HA 2025.2.0/Python 3.13 and HA 2026.10.1/Python 3.14: 187 tests pass per version
+  on the current candidate, including diagnostics contract reporting. Dependency
+  checks, Ruff, Bandit, workflow lint and full local Hassfest pass.
+- Reolink and Ring have historical physical recording-input evidence within the
+  tested routes. The new contract/DST candidate has not yet passed physical
+  Windows video-to-ONNX-to-Review acceptance; earlier evidence does not certify it.
+- Older five-part Reolink FILE sources, including the tested HA 2025.2.0 source,
+  are blocked for automatic video input. General integration remains supported.
+  Seven-part sources require valid device clock and historical DST rules;
+  ambiguous or invalid per-record times are skipped, never guessed.
+- UniFi Protect, Tapo Cameras Control and Blink have source tests only; physical
+  validation is outstanding. No all-model or all-firmware claim is made.
+- Activation admits at most one newest completed recording, then new captures
+  only; reconnect does not import historical backlog. The stability guard is 30s.
+  Source tests establish these rules; physical acceptance is still required.
+
+Update Desktop to a contract-2 build first; video input must stay blocked until
+the matching integration is installed and HA restarted. Verify authenticated
+contract 2 on both peers before enabling intake. An old peer is safe only while
+the new peer blocks recording input. Rolling both peers back to versions without
+contract 2 is **not a proven safe rollback**. Preserve backups and pause input
+before recovery; do not remove cameras or change datasets to make a test pass.
+
+## Historical evidence (through 2026-10-17)
+
 Updated 2026-10-17. These observations cover different scopes.
 
 | Check | Result and scope |

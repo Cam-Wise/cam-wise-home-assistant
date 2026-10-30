@@ -28,6 +28,7 @@ TO_REDACT = {
 
 STATUS_KEYS = (
     "api_version",
+    "recording_contract",
     "version",
     "environment",
     "status",
