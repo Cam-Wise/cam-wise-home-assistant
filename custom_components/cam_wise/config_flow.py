@@ -3,17 +3,22 @@
 from __future__ import annotations
 
 from typing import Any
+import hashlib
+import logging
+import secrets
 
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.core import State, callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .client import (
     CamWiseApiClient,
+    CamWiseAuthError,
     CamWiseConnectionError,
     CamWiseUnsupportedApiError,
     normalize_host,
@@ -32,6 +37,7 @@ from .const import (
 from .events import ROLE_DOMAINS, mapping_errors
 
 CONF_USE_RECOMMENDED = "use_recommended"
+_LOGGER = logging.getLogger(__name__)
 CONF_CHOOSE_ENTITIES = "choose_entities"
 
 _ROLE_LABELS = {
@@ -66,6 +72,9 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         self._discovered: dict[str, Any] | None = None
         self._info: dict[str, Any] | None = None
+        self._pair_token: str | None = None
+        self._pair_code = ""
+        self._reauth_entry: ConfigEntry | None = None
 
     @staticmethod
     @callback
@@ -89,6 +98,18 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except (CamWiseConnectionError, ValueError):
             return self.async_abort(reason="cannot_connect")
 
+        for entry in self._async_current_entries():
+            if entry.unique_id == str(info["device_id"]) and info.get("pairing_required") and not entry.data.get("pairing_token"):
+                # Do not silently move a working legacy entry to a token-only port.
+                return self.async_abort(reason="already_configured")
+            if entry.unique_id == str(info["device_id"]) and entry.data.get("pairing_token"):
+                client = CamWiseApiClient(async_get_clientsession(self.hass), host, port, entry.data["pairing_token"])
+                try:
+                    status = await client.async_status()
+                    if status.get("device_id") != entry.unique_id:
+                        return self.async_abort(reason="cannot_connect")
+                except CamWiseConnectionError:
+                    return self.async_abort(reason="cannot_connect")
         await self.async_set_unique_id(str(info["device_id"]))
         self._abort_if_unique_id_configured(
             updates={CONF_HOST: host, CONF_PORT: port}
@@ -105,6 +126,8 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._discovered is None or self._info is None:
             return self.async_abort(reason="discovery_expired")
         if user_input is not None:
+            if self._info.get("pairing_required"):
+                return await self.async_step_pair()
             environment = str(self._info.get("environment") or "unknown")
             return self.async_create_entry(
                 title=f"Cam-Wise ({environment})", data=self._discovered
@@ -139,6 +162,10 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 await self.async_set_unique_id(str(info["device_id"]))
                 self._abort_if_unique_id_configured()
+                if info.get("pairing_required"):
+                    self._discovered = {CONF_HOST: host, CONF_PORT: port}
+                    self._info = info
+                    return await self.async_step_pair()
                 return self.async_create_entry(
                     title=f"Cam-Wise ({info.get('environment', 'unknown')})",
                     data={CONF_HOST: host, CONF_PORT: port},
@@ -146,6 +173,58 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=_schema(), errors=errors
         )
+
+    async def async_step_pair(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if self._discovered is None or self._info is None:
+            return self.async_abort(reason="discovery_expired")
+        if user_input and user_input.get("new_request"):
+            self._pair_token = None
+            self._pair_code = ""
+        client = CamWiseApiClient(async_get_clientsession(self.hass),
+            self._discovered[CONF_HOST], self._discovered[CONF_PORT], self._pair_token)
+        errors = {}
+        try:
+            if self._pair_token is None:
+                self._pair_token = secrets.token_urlsafe(32)
+                verifier = hashlib.sha256(self._pair_token.encode()).hexdigest()
+                response = await client.async_request_pairing(verifier)
+                if response.get("code") != verifier[:6].upper():
+                    raise CamWiseConnectionError("Invalid pairing response")
+                self._pair_code = verifier[:6].upper()
+            elif user_input is not None:
+                status = await client.async_status()
+                if status.get("device_id") != self._info["device_id"]:
+                    return self.async_abort(reason="cannot_connect")
+                if self._reauth_entry is not None:
+                    return self.async_update_reload_and_abort(self._reauth_entry,
+                        data_updates={"pairing_token": self._pair_token}, reason="reauth_successful")
+                return self.async_create_entry(title=f"Cam-Wise ({self._info.get('environment', 'unknown')})",
+                    data={**self._discovered, "pairing_token": self._pair_token})
+        except CamWiseAuthError:
+            errors["base"] = "approval_required"
+        except CamWiseConnectionError as err:
+            if not self._pair_code:
+                self._pair_token = None
+            status = getattr(err.__cause__, "status", None)
+            errors["base"] = "pairing_unavailable" if status == 409 else "cannot_connect"
+            # Diagnose transport/response failures without logging credentials,
+            # verification codes, payloads or request URLs.
+            _LOGGER.warning("Pairing step failed: cause=%s http_status=%s code_received=%s",
+                            type(err.__cause__).__name__ if err.__cause__ else type(err).__name__,
+                            status, bool(self._pair_code))
+        return self.async_show_form(step_id="pair", data_schema=vol.Schema({vol.Optional("new_request", default=False): bool}),
+            errors=errors, description_placeholders={"code": self._pair_code or "—"})
+
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
+        self._reauth_entry = self._get_reauth_entry()
+        self._discovered = {CONF_HOST: entry_data[CONF_HOST], CONF_PORT: entry_data[CONF_PORT]}
+        try:
+            self._info = await self._async_validate(entry_data[CONF_HOST], entry_data[CONF_PORT])
+        except (CamWiseConnectionError, CamWiseUnsupportedApiError):
+            return self.async_abort(reason="cannot_connect")
+        if self._info["device_id"] != self._reauth_entry.unique_id or not self._info.get("pairing_required"):
+            return self.async_abort(reason="cannot_connect")
+        return await self.async_step_pair()
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -158,6 +237,9 @@ class CamWiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 host = normalize_host(user_input[CONF_HOST])
                 port = int(user_input[CONF_PORT])
                 info = await self._async_validate(host, port)
+                if entry.data.get("pairing_token"):
+                    client = CamWiseApiClient(async_get_clientsession(self.hass), host, port, entry.data["pairing_token"])
+                    await client.async_status()
             except ValueError:
                 errors["base"] = "invalid_host"
             except CamWiseUnsupportedApiError:
@@ -378,9 +460,16 @@ class CamWiseOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             cleaned = {
                 key: str(value or "").strip()
-                for key, value in user_input.items()
+                for key, value in user_input.items() if key != "recording_camera_entities"
             }
+            cameras = user_input.get("recording_camera_entities", [])
             errors = self._mapping_errors(cleaned)
+            if (not isinstance(cameras, list) or len(cameras) > 32 or
+                any(not isinstance(entity, str) or not entity.startswith("camera.") or
+                    self.hass.states.get(entity) is None for entity in cameras)):
+                errors["base"] = "invalid_mapping"
+            else:
+                cleaned["recording_camera_entities"] = list(dict.fromkeys(cameras))
             if not errors:
                 return self.async_create_entry(
                     title="", data={**self.config_entry.options, **cleaned}
@@ -391,6 +480,9 @@ class CamWiseOptionsFlow(config_entries.OptionsFlow):
             errors=errors,
             data_schema=vol.Schema(
                 {
+                    vol.Optional("recording_camera_entities",
+                        default=current.get("recording_camera_entities", [])):
+                        selector.EntitySelector(selector.EntitySelectorConfig(domain="camera", multiple=True)),
                     vol.Optional(
                         CONF_CAMERA_ENTITY,
                         default=current.get(CONF_CAMERA_ENTITY, ""),

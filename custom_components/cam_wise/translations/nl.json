@@ -16,11 +16,11 @@
       },
       "confirm": {
         "title": "Cam-Wise gevonden",
-        "description": "Cam-Wise is gevonden op {host}:{port}. Versie: {version}. Omgeving: {environment}."
+        "description": "Cam-Wise is gevonden op {host}:{port}. Versie: {version}. Omgeving: {environment}.\n\nControleer of dit de bedoelde installatie is. WorkTest is een aparte testomgeving; bevestig deze alleen als je die bewust wilt koppelen."
       },
       "reconfigure": {
         "title": "Cam-Wise opnieuw configureren",
-        "description": "Werk het LAN-adres van deze Cam-Wise-installatie bij.",
+        "description": "Werk het LAN-adres van deze Cam-Wise-installatie bij. Camera-instellingen blijven bewaard. Een andere installatie moet je apart toevoegen.",
         "data": {
           "host": "Host- of IP-adres",
           "port": "API-poort"
@@ -29,20 +29,30 @@
           "host": "De nieuwe lokale hostnaam of het nieuwe IP-adres van dezelfde Cam-Wise-installatie.",
           "port": "De lokale API-poort van Cam-Wise."
         }
+      },
+      "pair": {
+        "title": "Bevestig in Cam-Wise Desktop",
+        "description": "**Vergelijkingscode: {code}**\n\nOpen Cam-Wise Desktop en vergelijk deze code met de aanvraag daar. Kies alleen bij gelijke codes Toestaan. Klik daarna hier op Verzenden. HTTP op je vertrouwde thuisnetwerk is afluisterbaar; gebruik geen openbaar of gastnetwerk.",
+        "data": {
+          "new_request": "Nieuwe aanvraag (na weigeren of verlopen)"
+        }
       }
     },
     "error": {
-      "cannot_connect": "Kan geen verbinding maken met Cam-Wise.",
+      "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "invalid_host": "Voer een hostnaam of IP-adres in zonder pad of querystring.",
       "unsupported_api_version": "Deze Cam-Wise API-versie wordt niet ondersteund.",
-      "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie."
+      "different_device": "Dit adres hoort bij een andere Cam-Wise-installatie.",
+      "approval_required": "Cam-Wise heeft deze aanvraag nog niet goedgekeurd. Vergelijk de code en kies daar Toestaan voordat je hier op Verzenden klikt. Is de aanvraag verlopen of geweigerd? Open in Cam-Wise een nieuwe koppelperiode en vink hier Nieuwe aanvraag aan.",
+      "pairing_unavailable": "Cam-Wise is bereikbaar, maar accepteert nu geen nieuwe aanvraag: er loopt al een aanvraag of de koppelperiode is verlopen. Wijs een oude aanvraag in Desktop af of laat die verlopen. Open daarna een nieuwe koppelperiode en probeer hier een Nieuwe aanvraag."
     },
     "abort": {
       "already_configured": "Deze Cam-Wise-installatie is al geconfigureerd.",
-      "cannot_connect": "De gevonden Cam-Wise-installatie kon niet worden bereikt.",
+      "cannot_connect": "Cam-Wise is niet bereikbaar. Controleer of Desktop draait en LAN-toegang bewust is ingeschakeld. Controleer bij een gewijzigd adres de verbindingsgegevens via Opnieuw configureren.",
       "discovery_expired": "De gevonden Cam-Wise-installatie is niet meer beschikbaar. Voeg deze handmatig toe of wacht tot discovery opnieuw draait.",
       "reconfigure_successful": "De verbindingsgegevens van Cam-Wise zijn bijgewerkt.",
-      "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund."
+      "unsupported_api_version": "De gevonden Cam-Wise API-versie wordt niet ondersteund.",
+      "reauth_successful": "Koppeling opnieuw goedgekeurd."
     }
   },
   "options": {
@@ -66,13 +76,15 @@
           "camera_entity_id": "Camera-entiteit",
           "recording_entity_id": "Opname-klaar-entiteit",
           "motion_entity_id": "Bewegingsentiteit",
-          "ding_entity_id": "Deurbelentiteit"
+          "ding_entity_id": "Deurbelentiteit",
+          "recording_camera_entities": "Camera’s voor video-opnames"
         },
         "data_description": {
           "camera_entity_id": "Camera-entiteit die als broncamera in Cam-Wise reviewitems wordt gebruikt.",
           "recording_entity_id": "Entiteit die de nieuwste media-identificatie geeft zodra een opname klaarstaat.",
           "motion_entity_id": "Entiteit waarvan statuswijzigingen bewegingsgebeurtenissen aangeven.",
-          "ding_entity_id": "Entiteit waarvan statuswijzigingen deurbelgebeurtenissen aangeven."
+          "ding_entity_id": "Entiteit waarvan statuswijzigingen deurbelgebeurtenissen aangeven.",
+          "recording_camera_entities": "Sta deze camera’s toe voor het ophalen van bestaande video-opnames. Iedere camera houdt in Cam-Wise een eigen dataset, model en wachtrij. Zet ophalen per camera aan in Cam-Wise."
         }
       }
     },
@@ -93,6 +105,12 @@
       "attention_required": {
         "name": "Aandacht vereist"
       }
+    }
+  },
+  "issues": {
+    "recording_desktop_update": {
+      "title": "Werk Cam-Wise Desktop bij voor video-invoer",
+      "description": "Deze Desktop-versie ondersteunt het betrouwbare opnametijdcontract niet. Werk Desktop bij voordat u automatische video-invoer inschakelt. Bestaande camera’s, datasets, modellen en Review-items blijven behouden."
     }
   }
 }

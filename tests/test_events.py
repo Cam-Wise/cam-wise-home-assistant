@@ -435,3 +435,16 @@ async def test_untrusted_result_values_are_not_exported(hass, api, entry, result
     assert "synthetic-secret" not in str(exported)
     assert "synthetic-private-media" not in str(exported)
     assert not handler.retries
+
+
+async def test_snapshot_only_motion_forwards_without_recording_wait(hass, api, entry):
+    hass.config_entries.async_update_entry(entry, options={**MAPPING, "recording_entity_id": ""})
+    handler = await setup(hass, entry)
+    trigger(hass)
+    await hass.async_block_till_done()
+    assert not handler.pending
+    assert len(requests(api)) == 1
+    assert requests(api)[0]["media_identifier"].startswith("snapshot:")
+    trigger(hass, offset=1)
+    await hass.async_block_till_done()
+    assert len(requests(api)) == 2

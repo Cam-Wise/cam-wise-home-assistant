@@ -307,6 +307,11 @@ class CamWiseEventHandler:
                 self.diagnostics["expired_count"] += 1
                 return
             media = item.payload["media_identifier"]
+            if not media and not self.routes["recording_ready"]:
+                # Snapshot-only cameras have no future recording-ready transition.
+                media = "snapshot:" + str(item.payload.get("context_id") or item.payload.get("event_id") or
+                    (str(item.payload.get("trigger_entity_id")) + str(item.payload.get("occurred_at"))))
+                item.payload["media_identifier"] = media
             if not media:
                 if len(self.pending) >= MAX_PENDING:
                     self.diagnostics["overflow_count"] += 1
@@ -427,7 +432,28 @@ class CamWiseEventHandler:
         if self.closed:
             return
         try:
-            await self.client.async_report_integration_status(dict(self.diagnostics))
+            payload = dict(self.diagnostics)
+            if self.entry.data.get("pairing_token"):
+                from homeassistant.helpers import entity_registry as er
+                registry = er.async_get(self.hass)
+                catalog = []
+                for state in self.hass.states.async_all("camera"):
+                    registered = registry.async_get(state.entity_id)
+                    device = registered.device_id if registered else None
+                    related = [s for s in self.hass.states.async_all() if device and
+                        (row := registry.async_get(s.entity_id)) and row.device_id == device]
+                    motion = next((s.entity_id for s in related if s.domain in {"event", "binary_sensor"} and
+                        (s.attributes.get("device_class") == "motion" or "motion" in s.entity_id)), "")
+                    ding = next((s.entity_id for s in related if s.domain in {"event", "binary_sensor"} and
+                        any(word in s.entity_id for word in ("ding", "doorbell"))), "")
+                    catalog.append({"entity_id": state.entity_id,
+                        "name": str(state.attributes.get("friendly_name") or state.entity_id)[:120],
+                        "motion": motion, "ding": ding,
+                        "recording": bool(state.attributes.get("video_url") and state.attributes.get("last_video_id"))})
+                http = getattr(self.hass, "http", None)
+                payload["bridge_port"] = getattr(http, "server_port", None)
+                payload["camera_catalog"] = catalog[:64]
+            await self.client.async_report_integration_status(payload)
         except CamWiseApiError:
             _LOGGER.debug("Cam-Wise integration status report unavailable")
 
